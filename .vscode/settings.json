@@ -1,0 +1,34 @@
+{
+  // Search settings
+  "search.useIgnoreFiles": false,
+  "search.exclude": {
+    "build": true,
+    "**/.git": true,
+    "**/.git*": true,
+    "**/bin": true,
+    "**/obj": true,
+  },
+
+  // Ignore some directories to keep the directory viewer clean
+  "files.exclude": {
+    "build": true,
+    "**/.git": true,
+    "**/bin": true,
+    "**/obj": true,
+  },
+  "files.insertFinalNewline": true,
+  "files.encoding": "utf8bom",
+  "files.autoGuessEncoding": false,
+  "files.trimTrailingWhitespace": true,
+
+  // Set project to use spaces
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+
+  // Set ruler and render-whitespace
+  "editor.rulers": [
+    100
+  ],
+  "terminal.integrated.cwd": "src"
+}
