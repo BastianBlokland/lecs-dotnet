@@ -9,7 +9,8 @@ leveraging modern dotnet
 
 ## Technologies
 * C# 7.3
-* Core3.0 (Currently in beta) ([Blog post](https://blogs.msdn.microsoft.com/dotnet/2018/10/04/update-on-net-core-3-0-and-net-framework-4-8/) [Download](https://dotnet.microsoft.com/download/dotnet-core/3.0))
+* Core3.0 (Currently in beta) ([Blog post](https://blogs.msdn.microsoft.com/dotnet/2018/10/04/update-on-net-core-3-0-and-net-framework-4-8/))
+([Download](https://dotnet.microsoft.com/download/dotnet-core/3.0))
 
 ## Project goals
 * Take advantage of core3.0 hardware intrinsics in high-frequency code-paths ([Blog post](https://blogs.msdn.microsoft.com/dotnet/2018/10/10/using-net-hardware-intrinsics-api-to-accelerate-machine-learning-scenarios/))
