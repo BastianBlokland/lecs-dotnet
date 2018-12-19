@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Root ruleset" Description="Base ruleset" ToolsVersion="14.0">
+
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+
+    <!-- 'Curly brackets must not be omitted' -->
+    <Rule Id="SA1503" Action="None" />
+
+    <!-- 'The file header is missing or not located at the top of the file' -->
+    <Rule Id="SA1633" Action="None" />
+
+  </Rules>
+
+  <Rules AnalyzerId="FxCop.Analyzers" RuleNamespace="FxCop.Analyzers">
+
+  </Rules>
+
+</RuleSet>

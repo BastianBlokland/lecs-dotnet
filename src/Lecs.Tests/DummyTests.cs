@@ -8,7 +8,6 @@ namespace Lecs.Tests
         [Fact]
         public void Dummy_ReplaceMeWithRealTest()
         {
-
         }
     }
 }
