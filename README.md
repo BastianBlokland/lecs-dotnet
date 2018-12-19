@@ -3,6 +3,9 @@
 
 `Work In Progress`
 
+[![Build status](https://dev.azure.com/bastian-blokland/Lecs/_apis/build/status/Lecs-CI)](https://dev.azure.com/bastian-blokland/Lecs/_build/latest?definitionId=-1)
+
+
 ## Summary
 Prototype for a lightweight easy to use ecs framework ([Wiki](https://en.wikipedia.org/wiki/Entity%E2%80%93component%E2%80%93system))
 leveraging modern dotnet
