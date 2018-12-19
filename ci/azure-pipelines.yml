@@ -6,6 +6,7 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
+  sdk: '3.0.100-preview-009812'
   buildConfiguration: 'Release'
   sln: './src/Lecs.sln'
   tests: './src/Lecs.Tests/Lecs.Tests.csproj'
@@ -13,7 +14,7 @@ variables:
 steps:
 - task: DotNetCoreInstaller@0
   inputs:
-    version: '3.0.100-preview-009812'
+    version: $(sdk)
 - script: dotnet build --configuration $(buildConfiguration) $(sln)
   displayName: 'dotnet build $(buildConfiguration)'
 - script: dotnet test $(tests) --logger "xunit;LogFileName=TestResults.xml"
