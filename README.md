@@ -3,7 +3,7 @@
 
 `Work In Progress`
 
-[![Build status](https://dev.azure.com/bastian-blokland/Lecs/_apis/build/status/Lecs-CI)](https://dev.azure.com/bastian-blokland/Lecs/_build/latest?definitionId=-1)
+[![Build status](https://dev.azure.com/bastian-blokland/Lecs/_apis/build/status/Lecs-CI)](https://dev.azure.com/bastian-blokland/Lecs/_build/latest?definitionId=-1) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 
 ## Summary
