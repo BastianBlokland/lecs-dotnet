@@ -11,6 +11,9 @@ variables:
   tests: './src/Lecs.Tests/Lecs.Tests.csproj'
 
 steps:
+- task: DotNetCoreInstaller@0
+  inputs:
+    version: '3.0.100'
 - script: dotnet build --configuration $(buildConfiguration) $(sln)
   displayName: 'dotnet build $(buildConfiguration)'
 - script: dotnet test $(tests) --logger "xunit;LogFileName=TestResults.xml"
