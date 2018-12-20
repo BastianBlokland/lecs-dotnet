@@ -25,8 +25,3 @@ steps:
     testResultsFormat: 'xUnit'
     testResultsFiles: '**/TestResults.xml'
   condition: always()
-- task: mspremier.BuildQualityChecks.QualityChecks-task.BuildQualityChecks@5
-  displayName: 'check build quality'
-  inputs:
-    checkWarnings: true
-    showStatistics: true
