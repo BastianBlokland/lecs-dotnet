@@ -9,6 +9,7 @@
     <AssemblyName>Lecs</AssemblyName>
 
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
