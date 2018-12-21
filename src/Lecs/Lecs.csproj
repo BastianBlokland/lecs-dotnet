@@ -9,7 +9,6 @@
     <AssemblyName>Lecs</AssemblyName>
 
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
