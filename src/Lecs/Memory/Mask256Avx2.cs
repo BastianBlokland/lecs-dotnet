@@ -59,6 +59,18 @@ namespace Lecs.Memory
 
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void ClearAvx2()
+        {
+            byte zero = 0;
+            fixed (int* dataPointer = this.data)
+            {
+                var zeroVector = Avx2.BroadcastScalarToVector256(&zero);
+                Avx.Store(dataPointer, zeroVector.AsInt32());
+            }
+        }
+
+        /// <summary> NOTE: Query for support before calling this! </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool EqualsAvx2(in Mask256 other)
         {
             /*
@@ -72,7 +84,7 @@ namespace Lecs.Memory
                 var vectorA = Avx2.LoadVector256(dataPointer).AsByte();
                 var vectorB = Avx2.LoadVector256(otherDataPointer).AsByte();
                 var elementWiseResult = Avx2.CompareEqual(vectorA, vectorB);
-                return Avx2.MoveMask(elementWiseResult) == 0xfffffff;
+                return Avx2.MoveMask(elementWiseResult) == -1; // -1 is 32 bits set to 1
             }
         }
     }

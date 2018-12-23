@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.Intrinsics.X86;
 
 namespace Lecs.Memory
 {
@@ -43,8 +42,6 @@ namespace Lecs.Memory
 
         internal void RemoveSoftware(in Mask256 other)
         {
-            /* Software fallback */
-
             fixed (int* dataPointer = this.data)
             fixed (int* otherDataPointer = other.data)
             {

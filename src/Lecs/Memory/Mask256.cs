@@ -80,8 +80,8 @@ namespace Lecs.Memory
 
         public void Clear()
         {
-            if (Avx.IsSupported)
-                ClearAvx();
+            if (Avx2.IsSupported)
+                ClearAvx2();
             else
                 ClearSoftware();
         }
@@ -97,8 +97,7 @@ namespace Lecs.Memory
             }
         }
 
-        public override bool Equals(object obj) =>
-            (obj is Mask256) && this.Equals((Mask256)obj);
+        public override bool Equals(object obj) => (obj is Mask256) && this.Equals((Mask256)obj);
 
         public bool Equals(in Mask256 other)
         {

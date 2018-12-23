@@ -10,17 +10,14 @@ namespace Lecs.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool HasAvx(in Mask256 other)
         {
-            /*
-            With Avx we can get the inverted result in a single 'testnzc' instruction so we only
-            need do one invert at the end to get the result
-            */
+            /* With Avx we can get the result with a single inverted 'TestZ' instruction */
 
             fixed (int* dataPointer = this.data)
             fixed (int* otherDataPointer = other.data)
             {
                 var vectorA = Avx.LoadVector256(dataPointer);
                 var vectorB = Avx.LoadVector256(otherDataPointer);
-                return !Avx.TestNotZAndNotC(vectorA, vectorB);
+                return !Avx.TestZ(vectorA, vectorB);
             }
         }
 
@@ -28,14 +25,14 @@ namespace Lecs.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool NotHasAvx(in Mask256 other)
         {
-            /* With Avx we can get the result with a single 'testc' instruction */
+            /* With Avx we can get the result with a single 'TestZ' instruction */
 
             fixed (int* dataPointer = this.data)
             fixed (int* otherDataPointer = other.data)
             {
                 var vectorA = Avx.LoadVector256(dataPointer);
                 var vectorB = Avx.LoadVector256(otherDataPointer);
-                return Avx.TestC(vectorA, vectorB);
+                return Avx.TestZ(vectorA, vectorB);
             }
         }
 
@@ -117,17 +114,6 @@ namespace Lecs.Memory
 
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void ClearAvx()
-        {
-            fixed (int* dataPointer = this.data)
-            {
-                var zeroVector = Avx.SetZeroVector256<int>();
-                Avx.Store(dataPointer, zeroVector);
-            }
-        }
-
-        /// <summary> NOTE: Query for support before calling this! </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool EqualsAvx(in Mask256 other)
         {
             /* With Avx we do the same but in two steps of 128 bits */
@@ -139,16 +125,16 @@ namespace Lecs.Memory
                 var vectorA = Avx.LoadVector128(dataPointer).AsByte();
                 var vectorB = Avx.LoadVector128(otherDataPointer).AsByte();
                 var elementWiseResult = Avx.CompareEqual(vectorA, vectorB);
-                if (Avx.MoveMask(elementWiseResult) != 0xfffffff)
+                if (Avx.MoveMask(elementWiseResult) != 0b_1111_1111_1111_1111)
                     return false;
 
                 // Second 4 ints
                 int* dataPointer1Plus4 = dataPointer + 4;
                 int* dataPointer2Plus4 = otherDataPointer + 4;
-                vectorA = Avx.LoadVector128(dataPointer).AsByte();
-                vectorB = Avx.LoadVector128(otherDataPointer).AsByte();
+                vectorA = Avx.LoadVector128(dataPointer1Plus4).AsByte();
+                vectorB = Avx.LoadVector128(dataPointer2Plus4).AsByte();
                 elementWiseResult = Avx.CompareEqual(vectorA, vectorB);
-                return Avx.MoveMask(elementWiseResult) == 0xfffffff;
+                return Avx.MoveMask(elementWiseResult) == 0b_1111_1111_1111_1111;
             }
         }
     }
