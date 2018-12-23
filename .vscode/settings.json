@@ -1,4 +1,7 @@
 {
+  // Common plugins
+  "dotnet-test-explorer.testProjectPath": "src/Lecs.Tests/Lecs.Tests.csproj",
+
   // Search settings
   "search.useIgnoreFiles": false,
   "search.exclude": {
