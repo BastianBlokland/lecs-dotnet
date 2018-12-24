@@ -28,6 +28,14 @@
       "type": "shell",
       "group": "build",
       "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "benchmark",
+      "dependsOn": "build",
+      "command": "dotnet run -c Release -p src/Lecs.Benchmark/Lecs.Benchmark.csproj --exporters GitHub --artifacts ./artifacts/benchmark",
+      "type": "shell",
+      "group": "build",
+      "problemMatcher": "$msCompile"
     }
   ]
 }

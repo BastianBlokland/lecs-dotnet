@@ -33,5 +33,5 @@
   "editor.rulers": [
     100
   ],
-  "terminal.integrated.cwd": "src"
+  "terminal.integrated.cwd": ""
 }
