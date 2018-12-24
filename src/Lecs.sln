@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lecs", "Lecs\Lecs.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lecs.Tests", "Lecs.Tests\Lecs.Tests.csproj", "{858145C3-E924-4A42-8139-D7A99ECF67A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lecs.Benchmark", "Lecs.Benchmark\Lecs.Benchmark.csproj", "{802F070F-6A73-443E-9027-ADD248B686B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{858145C3-E924-4A42-8139-D7A99ECF67A6}.Release|x64.Build.0 = Release|Any CPU
 		{858145C3-E924-4A42-8139-D7A99ECF67A6}.Release|x86.ActiveCfg = Release|Any CPU
 		{858145C3-E924-4A42-8139-D7A99ECF67A6}.Release|x86.Build.0 = Release|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Debug|x64.Build.0 = Debug|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Debug|x86.Build.0 = Debug|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Release|x64.ActiveCfg = Release|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Release|x64.Build.0 = Release|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Release|x86.ActiveCfg = Release|Any CPU
+		{802F070F-6A73-443E-9027-ADD248B686B5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
