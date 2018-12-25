@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "ms-vscode.csharp",
+    "editorconfig.editorconfig",
+    "formulahendry.dotnet-test-explorer",
+    "k--kato.docomment"
+  ]
+}
