@@ -9,6 +9,86 @@ namespace Lecs.Tests.Memory
 {
     public sealed class Mask256Tests
     {
+        [AvxFact]
+        public void Mask256_HasAny_FindsAny_Avx()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
+            Assert.True(maskA.HasAnyAvx(in maskB));
+        }
+
+        [AvxFact]
+        public void Mask256_HasAny_DoesntFindsAny_Avx()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
+            Assert.False(maskA.HasAnyAvx(in maskB));
+        }
+
+        [Fact]
+        public void Mask256_HasAny_FindsAny_Software()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
+            Assert.True(maskA.HasAnySoftware(in maskB));
+        }
+
+        [Fact]
+        public void Mask256_HasAny_DoesntFindsAny_Software()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
+            Assert.False(maskA.HasAnySoftware(in maskB));
+        }
+
+        [Avx2Fact]
+        public void Mask256_HasAll_FindsAll_Avx2()
+        {
+            var maskA = Mask256.Create(new byte[] { 50, 75, 100, 125 });
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
+            Assert.True(maskA.HasAllAvx2(in maskB));
+        }
+
+        [AvxFact]
+        public void Mask256_HasAll_FindsAll_Avx()
+        {
+            var maskA = Mask256.Create(new byte[] { 50, 75, 100, 125 });
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
+            Assert.True(maskA.HasAllAvx(in maskB));
+        }
+
+        [Fact]
+        public void Mask256_HasAll_FindsAll_Software()
+        {
+            var maskA = Mask256.Create(new byte[] { 50, 75, 100, 125 });
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
+            Assert.True(maskA.HasAllSoftware(in maskB));
+        }
+
+        [Avx2Fact]
+        public void Mask256_HasAll_DoesntFindAll_Avx2()
+        {
+            var maskA = Mask256.Create(new byte[] { 75, 100, 125 });
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
+            Assert.False(maskA.HasAllAvx2(in maskB));
+        }
+
+        [AvxFact]
+        public void Mask256_HasAll_DoesntFindAll_Avx()
+        {
+            var maskA = Mask256.Create(new byte[] { 75, 100, 125 });
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
+            Assert.False(maskA.HasAllAvx(in maskB));
+        }
+
+        [Fact]
+        public void Mask256_HasAll_DoesntFindAll_Software()
+        {
+            var maskA = Mask256.Create(new byte[] { 75, 100, 125 });
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
+            Assert.False(maskA.HasAllSoftware(in maskB));
+        }
+
         [Avx2Theory]
         [MemberData(nameof(GetCombinedMasksData))]
         public void Mask256_CombinedMask_ClearResultsInEmpty_Avx2(Mask256 mask)
@@ -35,14 +115,12 @@ namespace Lecs.Tests.Memory
 
             testMask.Add(in mask);
             Assert.True(testMask.EqualsAvx2(in mask));
-            Assert.True(testMask.HasAvx(in mask));
-            Assert.False(testMask.NotHasAvx(in mask));
+            Assert.True(testMask.HasAllAvx(in mask));
 
             testMask.Remove(mask);
             Assert.True(testMask.EqualsAvx2(default(Mask256)));
             Assert.False(testMask.EqualsAvx2(in mask));
-            Assert.False(testMask.HasAvx(in mask));
-            Assert.True(testMask.NotHasAvx(in mask));
+            Assert.False(testMask.HasAnyAvx(in mask));
         }
 
         [AvxTheory]
@@ -53,14 +131,12 @@ namespace Lecs.Tests.Memory
 
             testMask.Add(in mask);
             Assert.True(testMask.EqualsAvx(in mask));
-            Assert.True(testMask.HasAvx(in mask));
-            Assert.False(testMask.NotHasAvx(in mask));
+            Assert.True(testMask.HasAllAvx(in mask));
 
             testMask.Remove(mask);
             Assert.True(testMask.EqualsAvx(default(Mask256)));
             Assert.False(testMask.EqualsAvx(in mask));
-            Assert.False(testMask.HasAvx(in mask));
-            Assert.True(testMask.NotHasAvx(in mask));
+            Assert.False(testMask.HasAnyAvx(in mask));
         }
 
         [Theory]
@@ -71,14 +147,12 @@ namespace Lecs.Tests.Memory
 
             defaultMask.Add(in mask);
             Assert.True(defaultMask.EqualsSoftware(in mask));
-            Assert.True(defaultMask.HasSoftware(in mask));
-            Assert.False(defaultMask.NotHasSoftware(in mask));
+            Assert.True(defaultMask.HasAllSoftware(in mask));
 
             defaultMask.Remove(in mask);
             Assert.True(defaultMask.EqualsSoftware(default(Mask256)));
             Assert.False(defaultMask.EqualsSoftware(in mask));
-            Assert.False(defaultMask.HasSoftware(in mask));
-            Assert.True(defaultMask.NotHasSoftware(in mask));
+            Assert.False(defaultMask.HasAnySoftware(in mask));
         }
 
         [Avx2Theory]
@@ -90,9 +164,9 @@ namespace Lecs.Tests.Memory
             {
                 Mask256 testMask = Mask256.Create((byte)i);
                 if (i == elementNumber)
-                    mask.NotHasAvx(testMask);
+                    Assert.False(mask.HasAnyAvx(in testMask));
                 else
-                    mask.HasAvx(testMask);
+                    Assert.True(mask.HasAllAvx2(in testMask));
             }
         }
 
@@ -105,9 +179,9 @@ namespace Lecs.Tests.Memory
             {
                 Mask256 testMask = Mask256.Create((byte)i);
                 if (i == elementNumber)
-                    mask.NotHasAvx(testMask);
+                    Assert.False(mask.HasAnyAvx(in testMask));
                 else
-                    mask.HasAvx(testMask);
+                    Assert.True(mask.HasAllAvx(in testMask));
             }
         }
 
@@ -120,10 +194,19 @@ namespace Lecs.Tests.Memory
             {
                 Mask256 testMask = Mask256.Create((byte)i);
                 if (i == elementNumber)
-                    mask.NotHasSoftware(testMask);
+                    Assert.False(mask.HasAnySoftware(in testMask));
                 else
-                    mask.HasSoftware(testMask);
+                    Assert.True(mask.HasAllSoftware(in testMask));
             }
+        }
+
+        [Fact]
+        public void Mask256_ToString_ExpectedOutput()
+        {
+            var mask = Mask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
+            var expectedString =
+                "0000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000001";
+            Assert.Equal(expectedString, mask.ToString());
         }
 
         public static IEnumerable<object[]> GetSingleMasksData()

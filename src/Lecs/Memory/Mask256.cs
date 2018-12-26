@@ -1,11 +1,12 @@
 using System;
 using System.Runtime.Intrinsics.X86;
+using System.Text;
 
 namespace Lecs.Memory
 {
     public unsafe partial struct Mask256 : IEquatable<Mask256>
     {
-        public const int MaxEntries = byte.MaxValue;
+        public const int MaxEntries = 256;
 
         private fixed int data[8]; // 8 * 32 bit = 256 bit
 
@@ -31,27 +32,33 @@ namespace Lecs.Memory
                     var lowerLimit = i * 32; // 32 bit per int
                     var upperLimit = (i + 1) * 32; // 32 bit per int
                     if (bit < upperLimit)
+                    {
                         result.data[i] |= 1 << (bit - lowerLimit);
+                        break;
+                    }
                 }
             }
 
             return result;
         }
 
-        public bool Has(in Mask256 other)
+        public bool HasAll(in Mask256 other)
         {
-            if (Avx.IsSupported)
-                return HasAvx(in other);
+            if (Avx2.IsSupported)
+                return HasAllAvx2(in other);
             else
-                return HasSoftware(in other);
+            if (Avx.IsSupported)
+                return HasAllAvx(in other);
+            else
+                return HasAllSoftware(in other);
         }
 
-        public bool NotHas(in Mask256 other)
+        public bool HasAny(in Mask256 other)
         {
             if (Avx.IsSupported)
-                return NotHasAvx(in other);
+                return HasAnyAvx(in other);
             else
-                return NotHasSoftware(in other);
+                return HasAnySoftware(in other);
         }
 
         public void Add(in Mask256 other)
@@ -104,6 +111,25 @@ namespace Lecs.Memory
                     hashcode.Add(dataPointer[i]);
                 return hashcode.ToHashCode();
             }
+        }
+
+        public override string ToString()
+        {
+            var stringBuilder = new StringBuilder(capacity: 256);
+            fixed (int* dataPointer = this.data)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    int mask = 1;
+                    for (int j = 0; j < 32; j++)
+                    {
+                        stringBuilder.Append((dataPointer[i] & mask) != 0 ? "1" : "0");
+                        mask <<= 1;
+                    }
+                }
+            }
+
+            return stringBuilder.ToString();
         }
 
         public override bool Equals(object obj) => (obj is Mask256) && this.Equals((Mask256)obj);

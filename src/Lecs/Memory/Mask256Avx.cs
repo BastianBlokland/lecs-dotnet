@@ -8,22 +8,35 @@ namespace Lecs.Memory
     {
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool HasAvx(in Mask256 other)
+        internal bool HasAllAvx(in Mask256 other)
         {
-            /* With Avx we can get the result with a single inverted 'TestZ' instruction */
+            /* Basic logic is: A & B == B */
 
             fixed (int* dataPointer = this.data)
             fixed (int* otherDataPointer = other.data)
             {
-                var vectorA = Avx.LoadVector256(dataPointer);
-                var vectorB = Avx.LoadVector256(otherDataPointer);
-                return !Avx.TestZ(vectorA, vectorB);
+                // First 4 ints
+                var vectorA = Avx.LoadVector128(dataPointer).AsByte();
+                var vectorB = Avx.LoadVector128(otherDataPointer).AsByte();
+                var vectorAnd = Avx.And(vectorA, vectorB);
+                var elementWiseResult = Avx.CompareEqual(vectorAnd, vectorB);
+                if (Avx.MoveMask(elementWiseResult) != 0b_1111_1111_1111_1111)
+                    return false;
+
+                // Second 4 ints
+                int* dataPointer1Plus4 = dataPointer + 4;
+                int* dataPointer2Plus4 = otherDataPointer + 4;
+                vectorA = Avx.LoadVector128(dataPointer1Plus4).AsByte();
+                vectorB = Avx.LoadVector128(dataPointer2Plus4).AsByte();
+                vectorAnd = Avx.And(vectorA, vectorB);
+                elementWiseResult = Avx.CompareEqual(vectorAnd, vectorB);
+                return Avx.MoveMask(elementWiseResult) == 0b_1111_1111_1111_1111;
             }
         }
 
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool NotHasAvx(in Mask256 other)
+        internal bool HasAnyAvx(in Mask256 other)
         {
             /* With Avx we can get the result with a single 'TestZ' instruction */
 
@@ -32,7 +45,7 @@ namespace Lecs.Memory
             {
                 var vectorA = Avx.LoadVector256(dataPointer);
                 var vectorB = Avx.LoadVector256(otherDataPointer);
-                return Avx.TestZ(vectorA, vectorB);
+                return !Avx.TestZ(vectorA, vectorB);
             }
         }
 

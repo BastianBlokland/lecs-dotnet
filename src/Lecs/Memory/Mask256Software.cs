@@ -4,7 +4,7 @@ namespace Lecs.Memory
 {
     public unsafe partial struct Mask256 : IEquatable<Mask256>
     {
-        internal bool HasSoftware(in Mask256 other)
+        internal bool HasAllSoftware(in Mask256 other)
         {
             fixed (int* dataPointer = this.data)
             fixed (int* otherDataPointer = other.data)
@@ -17,15 +17,15 @@ namespace Lecs.Memory
             }
         }
 
-        internal bool NotHasSoftware(in Mask256 other)
+        internal bool HasAnySoftware(in Mask256 other)
         {
             fixed (int* dataPointer = this.data)
             fixed (int* otherDataPointer = other.data)
             {
                 // Todo: Benchmark if branching would be faster here
-                bool result = true;
+                bool result = false;
                 for (int i = 0; i < 8; i++)
-                    result &= (dataPointer[i] & otherDataPointer[i]) == 0;
+                    result |= (dataPointer[i] & otherDataPointer[i]) != 0;
                 return result;
             }
         }
