@@ -8,26 +8,6 @@ namespace Lecs.Memory
     {
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool HasAllAvx2(in Mask256 other)
-        {
-            /*
-            Basic logic is: A & B == B
-            TODO: Do some thinking if there is a more efficient way of doing this
-            */
-
-            fixed (long* dataPointer = this.data)
-            fixed (long* otherDataPointer = other.data)
-            {
-                var vectorA = Avx2.LoadVector256(dataPointer).AsByte();
-                var vectorB = Avx2.LoadVector256(otherDataPointer).AsByte();
-                var vectorAnd = Avx2.And(vectorA, vectorB);
-                var elementWiseResult = Avx2.CompareEqual(vectorAnd, vectorB);
-                return Avx2.MoveMask(elementWiseResult) == -1; // -1 is 32 bits set to 1
-            }
-        }
-
-        /// <summary> NOTE: Query for support before calling this! </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void AddAvx2(in Mask256 other)
         {
             /* With Avx2 we can do a 256 bit OR in a single instruction */

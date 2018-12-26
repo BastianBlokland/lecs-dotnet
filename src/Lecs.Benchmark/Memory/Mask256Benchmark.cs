@@ -85,16 +85,6 @@ namespace Lecs.Benchmark.Memory
                 result |= masks[i].HasAllAvx(in toCheck);
             return result;
         }
-
-        [Benchmark]
-        public bool HasAll_Avx2Mask256()
-        {
-            var toCheck = masks[0];
-            var result = false;
-            for (int i = 1; i < masks.Length; i++)
-                result |= masks[i].HasAllAvx2(in toCheck);
-            return result;
-        }
     }
 
     [MemoryDiagnoser]
@@ -184,7 +174,7 @@ namespace Lecs.Benchmark.Memory
 
         public bool HasAll(ReferenceMask64 other) => (other.data & data) == other.data;
 
-        public bool HasAny(ReferenceMask64 other) => (other.data & data) == 0;
+        public bool HasAny(ReferenceMask64 other) => (other.data & data) != 0;
 
         public void Add(ReferenceMask64 other) => data |= other.data;
 

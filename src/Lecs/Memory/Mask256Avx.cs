@@ -15,22 +15,9 @@ namespace Lecs.Memory
             fixed (long* dataPointer = this.data)
             fixed (long* otherDataPointer = other.data)
             {
-                // First 128 bit
-                var vectorA = Avx.LoadVector128(dataPointer).AsByte();
-                var vectorB = Avx.LoadVector128(otherDataPointer).AsByte();
-                var vectorAnd = Avx.And(vectorA, vectorB);
-                var elementWiseResult = Avx.CompareEqual(vectorAnd, vectorB);
-                if (Avx.MoveMask(elementWiseResult) != 0b_1111_1111_1111_1111)
-                    return false;
-
-                // Second 128 bit
-                long* dataPointer1Plus2 = dataPointer + 2;
-                long* dataPointer2Plus2 = otherDataPointer + 2;
-                vectorA = Avx.LoadVector128(dataPointer1Plus2).AsByte();
-                vectorB = Avx.LoadVector128(dataPointer2Plus2).AsByte();
-                vectorAnd = Avx.And(vectorA, vectorB);
-                elementWiseResult = Avx.CompareEqual(vectorAnd, vectorB);
-                return Avx.MoveMask(elementWiseResult) == 0b_1111_1111_1111_1111;
+                var vectorA = Avx.LoadVector256(dataPointer);
+                var vectorB = Avx.LoadVector256(otherDataPointer);
+                return Avx.TestC(vectorA, vectorB);
             }
         }
 

@@ -41,14 +41,6 @@ namespace Lecs.Tests.Memory
             Assert.False(maskA.HasAnySoftware(in maskB));
         }
 
-        [Avx2Fact]
-        public void Mask256_HasAll_FindsAll_Avx2()
-        {
-            var maskA = Mask256.Create(new byte[] { 50, 75, 100, 125 });
-            var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
-            Assert.True(maskA.HasAllAvx2(in maskB));
-        }
-
         [AvxFact]
         public void Mask256_HasAll_FindsAll_Avx()
         {
@@ -63,14 +55,6 @@ namespace Lecs.Tests.Memory
             var maskA = Mask256.Create(new byte[] { 50, 75, 100, 125 });
             var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
             Assert.True(maskA.HasAllSoftware(in maskB));
-        }
-
-        [Avx2Fact]
-        public void Mask256_HasAll_DoesntFindAll_Avx2()
-        {
-            var maskA = Mask256.Create(new byte[] { 75, 100, 125 });
-            var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
-            Assert.False(maskA.HasAllAvx2(in maskB));
         }
 
         [AvxFact]
@@ -166,7 +150,7 @@ namespace Lecs.Tests.Memory
                 if (i == elementNumber)
                     Assert.False(mask.HasAnyAvx(in testMask));
                 else
-                    Assert.True(mask.HasAllAvx2(in testMask));
+                    Assert.True(mask.HasAllAvx(in testMask));
             }
         }
 

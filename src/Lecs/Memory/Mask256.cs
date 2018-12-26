@@ -44,9 +44,6 @@ namespace Lecs.Memory
 
         public bool HasAll(in Mask256 other)
         {
-            if (Avx2.IsSupported)
-                return HasAllAvx2(in other);
-            else
             if (Avx.IsSupported)
                 return HasAllAvx(in other);
             else
