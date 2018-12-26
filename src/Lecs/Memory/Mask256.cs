@@ -17,13 +17,22 @@ namespace Lecs.Memory
 
         public static Mask256 Create(byte bit)
         {
+            Span<byte> bits = stackalloc byte[] { bit };
+            return Create(bits);
+        }
+
+        public static Mask256 Create(Span<byte> bits)
+        {
             var result = default(Mask256);
-            for (int i = 0; i < 8; i++)
+            foreach (byte bit in bits)
             {
-                var lowerLimit = i * 32; // 32 bit per int
-                var upperLimit = (i + 1) * 32; // 32 bit per int
-                if (bit < upperLimit)
-                    result.data[i] = 1 << (bit - lowerLimit);
+                for (int i = 0; i < 8; i++)
+                {
+                    var lowerLimit = i * 32; // 32 bit per int
+                    var upperLimit = (i + 1) * 32; // 32 bit per int
+                    if (bit < upperLimit)
+                        result.data[i] |= 1 << (bit - lowerLimit);
+                }
             }
 
             return result;
