@@ -77,32 +77,32 @@ namespace Lecs.Tests.Memory
         [MemberData(nameof(GetCombinedMasksData))]
         public void Mask256_CombinedMask_ClearResultsInEmpty_Avx2(Mask256 mask)
         {
-            Assert.False(mask.EqualsAvx2(default(Mask256)));
+            Assert.False(mask.EqualsAvx2(in Mask256.Empty));
             mask.ClearAvx2();
-            Assert.True(mask.EqualsAvx2(default(Mask256)));
+            Assert.True(mask.EqualsAvx2(in Mask256.Empty));
         }
 
         [Theory]
         [MemberData(nameof(GetCombinedMasksData))]
         public void Mask256_CombinedMask_ClearResultsInEmpty_Software(Mask256 mask)
         {
-            Assert.False(mask.EqualsSoftware(default(Mask256)));
+            Assert.False(mask.EqualsSoftware(in Mask256.Empty));
             mask.ClearSoftware();
-            Assert.True(mask.EqualsSoftware(default(Mask256)));
+            Assert.True(mask.EqualsSoftware(in Mask256.Empty));
         }
 
         [Avx2Theory]
         [MemberData(nameof(GetCombinedMasksData))]
         public void Mask256_CombinedMask_CanBeAddedAndRemoved_Avx2(Mask256 mask)
         {
-            var testMask = default(Mask256);
+            var testMask = Mask256.Create();
 
             testMask.Add(in mask);
             Assert.True(testMask.EqualsAvx2(in mask));
             Assert.True(testMask.HasAllAvx(in mask));
 
             testMask.Remove(mask);
-            Assert.True(testMask.EqualsAvx2(default(Mask256)));
+            Assert.True(testMask.EqualsAvx2(in Mask256.Empty));
             Assert.False(testMask.EqualsAvx2(in mask));
             Assert.False(testMask.HasAnyAvx(in mask));
         }
@@ -111,14 +111,14 @@ namespace Lecs.Tests.Memory
         [MemberData(nameof(GetCombinedMasksData))]
         public void Mask256_CombinedMask_CanBeAddedAndRemoved_Avx(Mask256 mask)
         {
-            var testMask = default(Mask256);
+            var testMask = Mask256.Create();
 
             testMask.Add(in mask);
             Assert.True(testMask.EqualsAvx(in mask));
             Assert.True(testMask.HasAllAvx(in mask));
 
             testMask.Remove(mask);
-            Assert.True(testMask.EqualsAvx(default(Mask256)));
+            Assert.True(testMask.EqualsAvx(in Mask256.Empty));
             Assert.False(testMask.EqualsAvx(in mask));
             Assert.False(testMask.HasAnyAvx(in mask));
         }
@@ -127,14 +127,14 @@ namespace Lecs.Tests.Memory
         [MemberData(nameof(GetCombinedMasksData))]
         public void Mask256_CombinedMask_CanBeAddedAndRemoved_Software(Mask256 mask)
         {
-            var defaultMask = default(Mask256);
+            var defaultMask = Mask256.Create();
 
             defaultMask.Add(in mask);
             Assert.True(defaultMask.EqualsSoftware(in mask));
             Assert.True(defaultMask.HasAllSoftware(in mask));
 
             defaultMask.Remove(in mask);
-            Assert.True(defaultMask.EqualsSoftware(default(Mask256)));
+            Assert.True(defaultMask.EqualsSoftware(in Mask256.Empty));
             Assert.False(defaultMask.EqualsSoftware(in mask));
             Assert.False(defaultMask.HasAnySoftware(in mask));
         }
@@ -209,7 +209,7 @@ namespace Lecs.Tests.Memory
         {
             for (int i = 0; i < 256; i++)
             {
-                var mask = Mask256.Create((byte)i);
+                var mask = Mask256.Create((byte)i, isMutable: false);
                 yield return (mask, (byte)i);
             }
         }
@@ -218,13 +218,11 @@ namespace Lecs.Tests.Memory
         {
             for (int i = 0; i < 256; i++)
             {
-                var mask = Mask256.Create((byte)i);
-                for (int j = 0; j < 3; j++)
-                {
-                    var otherMask = Mask256.Create((byte)((i + j) % 256));
-                    mask.Add(otherMask);
-                }
-                yield return mask;
+                Span<byte> bits = stackalloc byte[3];
+                for (int j = 0; j < bits.Length; j++)
+                    bits[j] = (byte)((i + j) % 256);
+
+                yield return Mask256.Create(bits, isMutable: false);
             }
         }
     }

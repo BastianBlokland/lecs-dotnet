@@ -8,87 +8,69 @@ namespace Lecs.Memory
     {
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool HasAllAvx(in Mask256 other)
+        internal static bool HasAllAvx(long* dataPointerA, long* dataPointerB)
         {
             /* Basic logic is: A & B == B */
 
-            fixed (long* dataPointer = this.data)
-            fixed (long* otherDataPointer = other.data)
-            {
-                var vectorA = Avx.LoadVector256(dataPointer);
-                var vectorB = Avx.LoadVector256(otherDataPointer);
-                return Avx.TestC(vectorA, vectorB);
-            }
+            var vectorA = Avx.LoadVector256(dataPointerA);
+            var vectorB = Avx.LoadVector256(dataPointerB);
+            return Avx.TestC(vectorA, vectorB);
         }
 
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool HasAnyAvx(in Mask256 other)
+        internal static bool HasAnyAvx(long* dataPointerA, long* dataPointerB)
         {
-            /* With Avx we can get the result with a single 'TestZ' instruction */
-
-            fixed (long* dataPointer = this.data)
-            fixed (long* otherDataPointer = other.data)
-            {
-                var vectorA = Avx.LoadVector256(dataPointer);
-                var vectorB = Avx.LoadVector256(otherDataPointer);
-                return !Avx.TestZ(vectorA, vectorB);
-            }
+            var vectorA = Avx.LoadVector256(dataPointerA);
+            var vectorB = Avx.LoadVector256(dataPointerB);
+            return Avx.TestNotZAndNotC(vectorA, vectorB);
         }
 
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void AddAvx(in Mask256 other)
+        internal static void AddAvx(long* dataPointerA, long* dataPointerB)
         {
             /* With Avx we need two 128 bit OR instructions */
 
-            fixed (long* dataPointer = this.data)
-            fixed (long* otherDataPointer = other.data)
-            {
-                // First 128 bit
-                var vectorA = Avx.LoadVector128(dataPointer);
-                var vectorB = Avx.LoadVector128(otherDataPointer);
-                var result = Avx.Or(vectorA, vectorB);
-                Avx.Store(dataPointer, result);
+            // First 128 bit
+            var vectorA = Avx.LoadVector128(dataPointerA);
+            var vectorB = Avx.LoadVector128(dataPointerB);
+            var result = Avx.Or(vectorA, vectorB);
+            Avx.Store(dataPointerA, result);
 
-                // Second 128 bit
-                long* dataPointer1Plus2 = dataPointer + 2;
-                long* dataPointer2Plus2 = otherDataPointer + 2;
-                vectorA = Avx.LoadVector128(dataPointer1Plus2);
-                vectorB = Avx.LoadVector128(dataPointer2Plus2);
-                result = Avx.Or(vectorA, vectorB);
-                Avx.Store(dataPointer1Plus2, result);
-            }
+            // Second 128 bit
+            long* dataPointer1Plus2 = dataPointerA + 2;
+            long* dataPointer2Plus2 = dataPointerB + 2;
+            vectorA = Avx.LoadVector128(dataPointer1Plus2);
+            vectorB = Avx.LoadVector128(dataPointer2Plus2);
+            result = Avx.Or(vectorA, vectorB);
+            Avx.Store(dataPointer1Plus2, result);
         }
 
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void RemoveAvx(in Mask256 other)
+        internal static void RemoveAvx(long* dataPointerA, long* dataPointerB)
         {
             /* With Avx we need two 128 bit AndNot instructions */
 
-            fixed (long* dataPointer = this.data)
-            fixed (long* otherDataPointer = other.data)
-            {
-                // First 128 bit
-                var vectorA = Avx.LoadVector128(dataPointer);
-                var vectorB = Avx.LoadVector128(otherDataPointer);
-                var result = Avx.AndNot(vectorB, vectorA);
-                Avx.Store(dataPointer, result);
+            // First 128 bit
+            var vectorA = Avx.LoadVector128(dataPointerA);
+            var vectorB = Avx.LoadVector128(dataPointerB);
+            var result = Avx.AndNot(vectorB, vectorA);
+            Avx.Store(dataPointerA, result);
 
-                // Second 128 bit
-                long* dataPointer1Plus2 = dataPointer + 2;
-                long* dataPointer2Plus2 = otherDataPointer + 2;
-                vectorA = Avx.LoadVector128(dataPointer1Plus2);
-                vectorB = Avx.LoadVector128(dataPointer2Plus2);
-                result = Avx.AndNot(vectorB, vectorA);
-                Avx.Store(dataPointer1Plus2, result);
-            }
+            // Second 128 bit
+            long* dataPointer1Plus2 = dataPointerA + 2;
+            long* dataPointer2Plus2 = dataPointerB + 2;
+            vectorA = Avx.LoadVector128(dataPointer1Plus2);
+            vectorB = Avx.LoadVector128(dataPointer2Plus2);
+            result = Avx.AndNot(vectorB, vectorA);
+            Avx.Store(dataPointer1Plus2, result);
         }
 
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void InvertAvx()
+        internal static void InvertAvx(long* dataPointer)
         {
             /*
             Weirdly enough there is no 'Not' instruction but according to stack-overflow the
@@ -96,19 +78,88 @@ namespace Lecs.Memory
             https://stackoverflow.com/questions/42613821/is-not-missing-from-sse-avx
             */
 
+            // First 128 bit
+            var vector = Avx.LoadVector128(dataPointer);
+            var allOne = Avx.CompareEqual(vector, vector);
+            var result = Avx.Xor(vector, allOne);
+            Avx.Store(dataPointer, result);
+
+            // Second 128 bit
+            long* dataPointerPlus2 = dataPointer + 2;
+            vector = Avx.LoadVector128(dataPointerPlus2);
+            result = Avx.Xor(vector, allOne);
+            Avx.Store(dataPointerPlus2, result);
+        }
+
+        /// <summary> NOTE: Query for support before calling this! </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool EqualsAvx(long* dataPointerA, long* dataPointerB)
+        {
+            /* With Avx we do the same but in two steps of 128 bits */
+
+            // First 128 bit
+            var vectorA = Avx.LoadVector128(dataPointerA).AsByte();
+            var vectorB = Avx.LoadVector128(dataPointerB).AsByte();
+            var elementWiseResult = Avx.CompareEqual(vectorA, vectorB);
+            if (Avx.MoveMask(elementWiseResult) != 0b_1111_1111_1111_1111)
+                return false;
+
+            // Second 128 bit
+            long* dataPointer1Plus4 = dataPointerA + 2;
+            long* dataPointer2Plus4 = dataPointerB + 2;
+            vectorA = Avx.LoadVector128(dataPointer1Plus4).AsByte();
+            vectorB = Avx.LoadVector128(dataPointer2Plus4).AsByte();
+            elementWiseResult = Avx.CompareEqual(vectorA, vectorB);
+            return Avx.MoveMask(elementWiseResult) == 0b_1111_1111_1111_1111;
+        }
+
+        /// <summary> NOTE: Query for support before calling this! </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool HasAllAvx(in Mask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                return HasAllAvx(dataPointerA, dataPointerB);
+            }
+        }
+
+        /// <summary> NOTE: Query for support before calling this! </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool HasAnyAvx(in Mask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                return HasAnyAvx(dataPointerA, dataPointerB);
+            }
+        }
+
+        /// <summary> NOTE: Query for support before calling this! </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void AddAvx(in Mask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                AddAvx(dataPointerA, dataPointerB);
+            }
+        }
+
+        /// <summary> NOTE: Query for support before calling this! </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void RemoveAvx(in Mask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                RemoveAvx(dataPointerA, dataPointerB);
+            }
+        }
+
+        /// <summary> NOTE: Query for support before calling this! </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void InvertAvx()
+        {
             fixed (long* dataPointer = this.data)
             {
-                // First 128 bit
-                var vector = Avx.LoadVector128(dataPointer);
-                var allOne = Avx.CompareEqual(vector, vector);
-                var result = Avx.Xor(vector, allOne);
-                Avx.Store(dataPointer, result);
-
-                // Second 128 bit
-                long* dataPointerPlus2 = dataPointer + 2;
-                vector = Avx.LoadVector128(dataPointerPlus2);
-                result = Avx.Xor(vector, allOne);
-                Avx.Store(dataPointerPlus2, result);
+                InvertAvx(dataPointer);
             }
         }
 
@@ -116,25 +167,9 @@ namespace Lecs.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool EqualsAvx(in Mask256 other)
         {
-            /* With Avx we do the same but in two steps of 128 bits */
-
-            fixed (long* dataPointer = this.data)
-            fixed (long* otherDataPointer = other.data)
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
             {
-                // First 128 bit
-                var vectorA = Avx.LoadVector128(dataPointer).AsByte();
-                var vectorB = Avx.LoadVector128(otherDataPointer).AsByte();
-                var elementWiseResult = Avx.CompareEqual(vectorA, vectorB);
-                if (Avx.MoveMask(elementWiseResult) != 0b_1111_1111_1111_1111)
-                    return false;
-
-                // Second 128 bit
-                long* dataPointer1Plus4 = dataPointer + 2;
-                long* dataPointer2Plus4 = otherDataPointer + 2;
-                vectorA = Avx.LoadVector128(dataPointer1Plus4).AsByte();
-                vectorB = Avx.LoadVector128(dataPointer2Plus4).AsByte();
-                elementWiseResult = Avx.CompareEqual(vectorA, vectorB);
-                return Avx.MoveMask(elementWiseResult) == 0b_1111_1111_1111_1111;
+                return EqualsAvx(dataPointerA, dataPointerB);
             }
         }
     }

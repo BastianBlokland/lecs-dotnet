@@ -138,7 +138,7 @@ namespace Lecs.Benchmark.Memory
             {
                 referenceMasks[i] = ReferenceMask64.Create((byte)(testData[i] % 64));
 
-                masks[i] = Mask256.Create(testData[i]);
+                masks[i] = Mask256.Create(testData[i], isMutable: false);
             }
 
             // Combine masks to create more realistic masks
@@ -162,8 +162,6 @@ namespace Lecs.Benchmark.Memory
         private long data;
 
         private ReferenceMask64(byte bit) => data = 1L << bit;
-
-        public static ReferenceMask64 Default { get; } = default(ReferenceMask64);
 
         public static ReferenceMask64 Create(byte bit)
         {
