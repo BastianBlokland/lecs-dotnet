@@ -9,11 +9,13 @@ namespace Lecs.Memory
             fixed (long* dataPointer = this.data)
             fixed (long* otherDataPointer = other.data)
             {
-                // Todo: Benchmark if branching would be faster here
-                bool result = true;
                 for (int i = 0; i < 4; i++)
-                    result &= (dataPointer[i] & otherDataPointer[i]) == otherDataPointer[i];
-                return result;
+                {
+                    if ((dataPointer[i] & otherDataPointer[i]) != otherDataPointer[i])
+                        return false;
+                }
+
+                return true;
             }
         }
 
@@ -22,11 +24,13 @@ namespace Lecs.Memory
             fixed (long* dataPointer = this.data)
             fixed (long* otherDataPointer = other.data)
             {
-                // Todo: Benchmark if branching would be faster here
-                bool result = false;
                 for (int i = 0; i < 4; i++)
-                    result |= (dataPointer[i] & otherDataPointer[i]) != 0;
-                return result;
+                {
+                    if ((dataPointer[i] & otherDataPointer[i]) != 0)
+                        return true;
+                }
+
+                return false;
             }
         }
 
