@@ -10,35 +10,35 @@ namespace Lecs.Tests.Memory
     public sealed class Mask256Tests
     {
         [AvxFact]
-        public void Mask256_HasAny_FindsAny_Avx()
+        public void Mask256_NotHasAny_FindsAny_Avx()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
-            Assert.True(maskA.HasAnyAvx(in maskB));
+            Assert.False(maskA.NotHasAnyAvx(in maskB));
         }
 
         [AvxFact]
-        public void Mask256_HasAny_DoesntFindsAny_Avx()
+        public void Mask256_NotHasAny_DoesntFindsAny_Avx()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
-            Assert.False(maskA.HasAnyAvx(in maskB));
+            Assert.True(maskA.NotHasAnyAvx(in maskB));
         }
 
         [Fact]
-        public void Mask256_HasAny_FindsAny_Software()
+        public void Mask256_NotHasAny_FindsAny_Software()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
-            Assert.True(maskA.HasAnySoftware(in maskB));
+            Assert.False(maskA.NotHasAnySoftware(in maskB));
         }
 
         [Fact]
-        public void Mask256_HasAny_DoesntFindsAny_Software()
+        public void Mask256_NotHasAny_DoesntFindsAny_Software()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
-            Assert.False(maskA.HasAnySoftware(in maskB));
+            Assert.True(maskA.NotHasAnySoftware(in maskB));
         }
 
         [AvxFact]
@@ -71,6 +71,38 @@ namespace Lecs.Tests.Memory
             var maskA = Mask256.Create(new byte[] { 75, 100, 125 });
             var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
             Assert.False(maskA.HasAllSoftware(in maskB));
+        }
+
+        [AvxFact]
+        public void Mask256_HasAny_FindsAny_Avx()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
+            Assert.True(maskA.HasAnyAvx(in maskB));
+        }
+
+        [AvxFact]
+        public void Mask256_HasAny_DoesntFindsAny_Avx()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
+            Assert.False(maskA.HasAnyAvx(in maskB));
+        }
+
+        [Fact]
+        public void Mask256_HasAny_FindsAny_Software()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
+            Assert.True(maskA.HasAnySoftware(in maskB));
+        }
+
+        [Fact]
+        public void Mask256_HasAny_DoesntFindsAny_Software()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
+            Assert.False(maskA.HasAnySoftware(in maskB));
         }
 
         [Avx2Theory]

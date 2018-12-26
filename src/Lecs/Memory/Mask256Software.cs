@@ -56,6 +56,18 @@ namespace Lecs.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool NotHasAnySoftware(long* dataPointerA, long* dataPointerB)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if ((dataPointerA[i] & dataPointerB[i]) != 0)
+                    return false;
+            }
+
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddSoftware(long* dataPointerA, long* dataPointerB)
         {
             for (int i = 0; i < 4; i++)
@@ -145,6 +157,15 @@ namespace Lecs.Memory
             fixed (long* dataPointerA = this.data, dataPointerB = other.data)
             {
                 return HasAnySoftware(dataPointerA, dataPointerB);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool NotHasAnySoftware(in Mask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                return NotHasAnySoftware(dataPointerA, dataPointerB);
             }
         }
 

@@ -121,6 +121,40 @@ namespace Lecs.Benchmark.Memory
         }
     }
 
+    [MemoryDiagnoser]
+    public class Mask256_NotHasAny_Benchmark : Mask256_BaseBenchmark
+    {
+        [Benchmark(Baseline = true)]
+        public bool NotHasAny_ReferenceMask64()
+        {
+            var toCheck = referenceMasks[0];
+            var result = false;
+            for (int i = 1; i < referenceMasks.Length; i++)
+                result |= referenceMasks[i].NotHasAny(toCheck);
+            return result;
+        }
+
+        [Benchmark]
+        public bool NotHasAny_SoftwareMask256()
+        {
+            var toCheck = masks[0];
+            var result = false;
+            for (int i = 1; i < masks.Length; i++)
+                result |= masks[i].NotHasAnySoftware(in toCheck);
+            return result;
+        }
+
+        [Benchmark]
+        public bool NotHasAny_AvxMask256()
+        {
+            var toCheck = masks[0];
+            var result = false;
+            for (int i = 1; i < masks.Length; i++)
+                result |= masks[i].NotHasAnyAvx(in toCheck);
+            return result;
+        }
+    }
+
     public abstract class Mask256_BaseBenchmark
     {
         protected const int ElementCount = 1000;
@@ -173,6 +207,8 @@ namespace Lecs.Benchmark.Memory
         public bool HasAll(ReferenceMask64 other) => (other.data & data) == other.data;
 
         public bool HasAny(ReferenceMask64 other) => (other.data & data) != 0;
+
+        public bool NotHasAny(ReferenceMask64 other) => (other.data & data) == 0;
 
         public void Add(ReferenceMask64 other) => data |= other.data;
 

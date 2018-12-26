@@ -28,6 +28,15 @@ namespace Lecs.Memory
 
         /// <summary> NOTE: Query for support before calling this! </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool NotHasAnyAvx(long* dataPointerA, long* dataPointerB)
+        {
+            var vectorA = Avx.LoadVector256(dataPointerA);
+            var vectorB = Avx.LoadVector256(dataPointerB);
+            return Avx.TestZ(vectorA, vectorB);
+        }
+
+        /// <summary> NOTE: Query for support before calling this! </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddAvx(long* dataPointerA, long* dataPointerB)
         {
             /* With Avx we need two 128 bit OR instructions */
@@ -130,6 +139,16 @@ namespace Lecs.Memory
             fixed (long* dataPointerA = this.data, dataPointerB = other.data)
             {
                 return HasAnyAvx(dataPointerA, dataPointerB);
+            }
+        }
+
+        /// <summary> NOTE: Query for support before calling this! </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool NotHasAnyAvx(in Mask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                return NotHasAnyAvx(dataPointerA, dataPointerB);
             }
         }
 

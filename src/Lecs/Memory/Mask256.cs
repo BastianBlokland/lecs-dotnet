@@ -62,6 +62,17 @@ namespace Lecs.Memory
             }
         }
 
+        public bool NotHasAny(in Mask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                if (Avx.IsSupported)
+                    return NotHasAnyAvx(dataPointerA, dataPointerB);
+                else
+                    return NotHasAnySoftware(dataPointerA, dataPointerB);
+            }
+        }
+
         public void Add(in Mask256 other)
         {
             Debug.Assert(isMutable);
