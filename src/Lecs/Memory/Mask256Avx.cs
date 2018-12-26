@@ -12,10 +12,10 @@ namespace Lecs.Memory
         {
             /* Basic logic is: A & B == B */
 
-            fixed (int* dataPointer = this.data)
-            fixed (int* otherDataPointer = other.data)
+            fixed (long* dataPointer = this.data)
+            fixed (long* otherDataPointer = other.data)
             {
-                // First 4 ints
+                // First 128 bit
                 var vectorA = Avx.LoadVector128(dataPointer).AsByte();
                 var vectorB = Avx.LoadVector128(otherDataPointer).AsByte();
                 var vectorAnd = Avx.And(vectorA, vectorB);
@@ -23,11 +23,11 @@ namespace Lecs.Memory
                 if (Avx.MoveMask(elementWiseResult) != 0b_1111_1111_1111_1111)
                     return false;
 
-                // Second 4 ints
-                int* dataPointer1Plus4 = dataPointer + 4;
-                int* dataPointer2Plus4 = otherDataPointer + 4;
-                vectorA = Avx.LoadVector128(dataPointer1Plus4).AsByte();
-                vectorB = Avx.LoadVector128(dataPointer2Plus4).AsByte();
+                // Second 128 bit
+                long* dataPointer1Plus2 = dataPointer + 2;
+                long* dataPointer2Plus2 = otherDataPointer + 2;
+                vectorA = Avx.LoadVector128(dataPointer1Plus2).AsByte();
+                vectorB = Avx.LoadVector128(dataPointer2Plus2).AsByte();
                 vectorAnd = Avx.And(vectorA, vectorB);
                 elementWiseResult = Avx.CompareEqual(vectorAnd, vectorB);
                 return Avx.MoveMask(elementWiseResult) == 0b_1111_1111_1111_1111;
@@ -40,8 +40,8 @@ namespace Lecs.Memory
         {
             /* With Avx we can get the result with a single 'TestZ' instruction */
 
-            fixed (int* dataPointer = this.data)
-            fixed (int* otherDataPointer = other.data)
+            fixed (long* dataPointer = this.data)
+            fixed (long* otherDataPointer = other.data)
             {
                 var vectorA = Avx.LoadVector256(dataPointer);
                 var vectorB = Avx.LoadVector256(otherDataPointer);
@@ -55,22 +55,22 @@ namespace Lecs.Memory
         {
             /* With Avx we need two 128 bit OR instructions */
 
-            fixed (int* dataPointer = this.data)
-            fixed (int* otherDataPointer = other.data)
+            fixed (long* dataPointer = this.data)
+            fixed (long* otherDataPointer = other.data)
             {
-                // First 4 ints
+                // First 128 bit
                 var vectorA = Avx.LoadVector128(dataPointer);
                 var vectorB = Avx.LoadVector128(otherDataPointer);
                 var result = Avx.Or(vectorA, vectorB);
                 Avx.Store(dataPointer, result);
 
-                // Second 4 ints
-                int* dataPointer1Plus4 = dataPointer + 4;
-                int* dataPointer2Plus4 = otherDataPointer + 4;
-                vectorA = Avx.LoadVector128(dataPointer1Plus4);
-                vectorB = Avx.LoadVector128(dataPointer2Plus4);
+                // Second 128 bit
+                long* dataPointer1Plus2 = dataPointer + 2;
+                long* dataPointer2Plus2 = otherDataPointer + 2;
+                vectorA = Avx.LoadVector128(dataPointer1Plus2);
+                vectorB = Avx.LoadVector128(dataPointer2Plus2);
                 result = Avx.Or(vectorA, vectorB);
-                Avx.Store(dataPointer1Plus4, result);
+                Avx.Store(dataPointer1Plus2, result);
             }
         }
 
@@ -80,22 +80,22 @@ namespace Lecs.Memory
         {
             /* With Avx we need two 128 bit AndNot instructions */
 
-            fixed (int* dataPointer = this.data)
-            fixed (int* otherDataPointer = other.data)
+            fixed (long* dataPointer = this.data)
+            fixed (long* otherDataPointer = other.data)
             {
-                // First 4 ints
+                // First 128 bit
                 var vectorA = Avx.LoadVector128(dataPointer);
                 var vectorB = Avx.LoadVector128(otherDataPointer);
                 var result = Avx.AndNot(vectorB, vectorA);
                 Avx.Store(dataPointer, result);
 
-                // Second 4 ints
-                int* dataPointer1Plus4 = dataPointer + 4;
-                int* dataPointer2Plus4 = otherDataPointer + 4;
-                vectorA = Avx.LoadVector128(dataPointer1Plus4);
-                vectorB = Avx.LoadVector128(dataPointer2Plus4);
+                // Second 128 bit
+                long* dataPointer1Plus2 = dataPointer + 2;
+                long* dataPointer2Plus2 = otherDataPointer + 2;
+                vectorA = Avx.LoadVector128(dataPointer1Plus2);
+                vectorB = Avx.LoadVector128(dataPointer2Plus2);
                 result = Avx.AndNot(vectorB, vectorA);
-                Avx.Store(dataPointer1Plus4, result);
+                Avx.Store(dataPointer1Plus2, result);
             }
         }
 
@@ -109,19 +109,19 @@ namespace Lecs.Memory
             https://stackoverflow.com/questions/42613821/is-not-missing-from-sse-avx
             */
 
-            fixed (int* dataPointer = this.data)
+            fixed (long* dataPointer = this.data)
             {
-                // First 4 ints
+                // First 128 bit
                 var vector = Avx.LoadVector128(dataPointer);
                 var allOne = Avx.CompareEqual(vector, vector);
                 var result = Avx.Xor(vector, allOne);
                 Avx.Store(dataPointer, result);
 
-                // Second 4 bits
-                int* dataPointerPlus4 = dataPointer + 4;
-                vector = Avx.LoadVector128(dataPointerPlus4);
+                // Second 128 bit
+                long* dataPointerPlus2 = dataPointer + 2;
+                vector = Avx.LoadVector128(dataPointerPlus2);
                 result = Avx.Xor(vector, allOne);
-                Avx.Store(dataPointerPlus4, result);
+                Avx.Store(dataPointerPlus2, result);
             }
         }
 
@@ -131,19 +131,19 @@ namespace Lecs.Memory
         {
             /* With Avx we do the same but in two steps of 128 bits */
 
-            fixed (int* dataPointer = this.data)
-            fixed (int* otherDataPointer = other.data)
+            fixed (long* dataPointer = this.data)
+            fixed (long* otherDataPointer = other.data)
             {
-                // First 4 ints
+                // First 128 bit
                 var vectorA = Avx.LoadVector128(dataPointer).AsByte();
                 var vectorB = Avx.LoadVector128(otherDataPointer).AsByte();
                 var elementWiseResult = Avx.CompareEqual(vectorA, vectorB);
                 if (Avx.MoveMask(elementWiseResult) != 0b_1111_1111_1111_1111)
                     return false;
 
-                // Second 4 ints
-                int* dataPointer1Plus4 = dataPointer + 4;
-                int* dataPointer2Plus4 = otherDataPointer + 4;
+                // Second 128 bit
+                long* dataPointer1Plus4 = dataPointer + 2;
+                long* dataPointer2Plus4 = otherDataPointer + 2;
                 vectorA = Avx.LoadVector128(dataPointer1Plus4).AsByte();
                 vectorB = Avx.LoadVector128(dataPointer2Plus4).AsByte();
                 elementWiseResult = Avx.CompareEqual(vectorA, vectorB);

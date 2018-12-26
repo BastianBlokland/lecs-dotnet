@@ -8,7 +8,7 @@ namespace Lecs.Memory
     {
         public const int MaxEntries = 256;
 
-        private fixed int data[8]; // 8 * 32 bit = 256 bit
+        private fixed long data[4]; // 4 * 64 bit = 256 bit
 
         public static Mask256 Default { get; } = default(Mask256);
 
@@ -27,13 +27,13 @@ namespace Lecs.Memory
             var result = default(Mask256);
             foreach (byte bit in bits)
             {
-                for (int i = 0; i < 8; i++)
+                for (int i = 0; i < 4; i++)
                 {
-                    var lowerLimit = i * 32; // 32 bit per int
-                    var upperLimit = (i + 1) * 32; // 32 bit per int
+                    var lowerLimit = i * 64; // 64 bit per long
+                    var upperLimit = (i + 1) * 64; // 64 bit per long
                     if (bit < upperLimit)
                     {
-                        result.data[i] |= 1 << (bit - lowerLimit);
+                        result.data[i] |= 1L << (bit - lowerLimit);
                         break;
                     }
                 }
@@ -105,9 +105,9 @@ namespace Lecs.Memory
         public override int GetHashCode()
         {
             var hashcode = default(HashCode);
-            fixed (int* dataPointer = this.data)
+            fixed (long* dataPointer = this.data)
             {
-                for (int i = 0; i < 8; i++)
+                for (int i = 0; i < 4; i++)
                     hashcode.Add(dataPointer[i]);
                 return hashcode.ToHashCode();
             }
@@ -116,12 +116,12 @@ namespace Lecs.Memory
         public override string ToString()
         {
             var stringBuilder = new StringBuilder(capacity: 256);
-            fixed (int* dataPointer = this.data)
+            fixed (long* dataPointer = this.data)
             {
-                for (int i = 0; i < 8; i++)
+                for (int i = 0; i < 4; i++)
                 {
-                    int mask = 1;
-                    for (int j = 0; j < 32; j++)
+                    long mask = 1L;
+                    for (int j = 0; j < 64; j++)
                     {
                         stringBuilder.Append((dataPointer[i] & mask) != 0 ? "1" : "0");
                         mask <<= 1;

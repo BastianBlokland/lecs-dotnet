@@ -15,8 +15,8 @@ namespace Lecs.Memory
             TODO: Do some thinking if there is a more efficient way of doing this
             */
 
-            fixed (int* dataPointer = this.data)
-            fixed (int* otherDataPointer = other.data)
+            fixed (long* dataPointer = this.data)
+            fixed (long* otherDataPointer = other.data)
             {
                 var vectorA = Avx2.LoadVector256(dataPointer).AsByte();
                 var vectorB = Avx2.LoadVector256(otherDataPointer).AsByte();
@@ -32,8 +32,8 @@ namespace Lecs.Memory
         {
             /* With Avx2 we can do a 256 bit OR in a single instruction */
 
-            fixed (int* dataPointer = this.data)
-            fixed (int* otherDataPointer = other.data)
+            fixed (long* dataPointer = this.data)
+            fixed (long* otherDataPointer = other.data)
             {
                 var vectorA = Avx2.LoadVector256(dataPointer);
                 var vectorB = Avx2.LoadVector256(otherDataPointer);
@@ -48,8 +48,8 @@ namespace Lecs.Memory
         {
             /* With Avx2 we can do a single 256 bit AndNot instruction */
 
-            fixed (int* dataPointer = this.data)
-            fixed (int* otherDataPointer = other.data)
+            fixed (long* dataPointer = this.data)
+            fixed (long* otherDataPointer = other.data)
             {
                 var vectorA = Avx2.LoadVector256(dataPointer);
                 var vectorB = Avx2.LoadVector256(otherDataPointer);
@@ -68,7 +68,7 @@ namespace Lecs.Memory
             https://stackoverflow.com/questions/42613821/is-not-missing-from-sse-avx
             */
 
-            fixed (int* dataPointer = this.data)
+            fixed (long* dataPointer = this.data)
             {
                 var vector = Avx2.LoadVector256(dataPointer);
                 var allOne = Avx2.CompareEqual(vector, vector);
@@ -82,10 +82,10 @@ namespace Lecs.Memory
         internal void ClearAvx2()
         {
             byte zero = 0;
-            fixed (int* dataPointer = this.data)
+            fixed (long* dataPointer = this.data)
             {
                 var zeroVector = Avx2.BroadcastScalarToVector256(&zero);
-                Avx.Store(dataPointer, zeroVector.AsInt32());
+                Avx.Store(dataPointer, zeroVector.AsInt64());
             }
         }
 
@@ -98,8 +98,8 @@ namespace Lecs.Memory
             Then we aggregate the results using 'MoveMask' and check if all bits are 1
             */
 
-            fixed (int* dataPointer = this.data)
-            fixed (int* otherDataPointer = other.data)
+            fixed (long* dataPointer = this.data)
+            fixed (long* otherDataPointer = other.data)
             {
                 var vectorA = Avx2.LoadVector256(dataPointer).AsByte();
                 var vectorB = Avx2.LoadVector256(otherDataPointer).AsByte();
