@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lecs.Memory
@@ -73,18 +74,7 @@ namespace Lecs.Memory
         {
             /* Basic logic is: A = 0 */
 
-            /*
-            BroadcastScaler:
-                FOR j := 0 to 31
-                    i := j*8
-                    dst[i+7:i] := a[7:0]
-                ENDFOR
-            https://software.intel.com/sites/landingpage/IntrinsicsGuide/#expand=527&techs=AVX2&text=broadcastb_epi8
-            */
-
-            byte zero = 0;
-            var zeroVector = Avx2.BroadcastScalarToVector256(&zero);
-            Avx.Store(dataPointer, zeroVector.AsInt64());
+            Avx.Store(dataPointer, Vector256<long>.Zero);
         }
 
         /* NOTE: Query for support before calling this! */
