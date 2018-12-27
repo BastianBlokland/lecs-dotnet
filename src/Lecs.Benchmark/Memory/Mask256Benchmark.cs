@@ -108,8 +108,8 @@ namespace Lecs.Benchmark.Memory
     {
         /*
         Note: These benchmarks have the side-effect of actually changing the data, which is bad but
-        in this case i know that none of the implementations benefit from a specific input-data
-        and making copies affects the results too much.
+        in this case i know that none of the implementations benefit from specific input-data and
+        making copies affects the results too much.
         */
 
         [Benchmark(Baseline = true)]
@@ -149,8 +149,8 @@ namespace Lecs.Benchmark.Memory
     {
         /*
         Note: These benchmarks have the side-effect of actually changing the data, which is bad but
-        in this case i know that none of the implementations benefit from a specific input-data
-        and making copies affects the results too much.
+        in this case i know that none of the implementations benefit from specific input-data and
+        making copies affects the results too much.
         */
 
         [Benchmark(Baseline = true)]
@@ -190,8 +190,8 @@ namespace Lecs.Benchmark.Memory
     {
         /*
         Note: These benchmarks have the side-effect of actually changing the data, which is bad but
-        in this case i know that none of the implementations benefit from a specific input-data
-        and making copies affects the results too much.
+        in this case i know that none of the implementations benefit from specific input-data and
+        making copies affects the results too much.
         */
 
         [Benchmark(Baseline = true)]
@@ -231,8 +231,8 @@ namespace Lecs.Benchmark.Memory
     {
         /*
         Note: These benchmarks have the side-effect of actually changing the data, which is bad but
-        in this case i know that none of the implementations benefit from the input-data being clear
-        and making copies affects the results too much.
+        in this case i know that none of the implementations benefit from specific input-data and
+        making copies affects the results too much.
         */
 
         [Benchmark(Baseline = true)]

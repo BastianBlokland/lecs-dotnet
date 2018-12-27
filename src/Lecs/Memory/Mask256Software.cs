@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Lecs.Memory
 {
-    public unsafe partial struct Mask256 : IEquatable<Mask256>
+    public unsafe partial struct Mask256
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void SetBitSoftware(long* dataPointer, byte bit)
@@ -122,15 +122,6 @@ namespace Lecs.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void ClearSoftware()
-        {
-            fixed (long* dataPointer = this.data)
-            {
-                ClearSoftware(dataPointer);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool EqualsSoftware(long* dataPointerA, long* dataPointerB)
         {
             for (int i = 0; i < 4; i++)
@@ -193,6 +184,15 @@ namespace Lecs.Memory
             fixed (long* dataPointer = this.data)
             {
                 InvertSoftware(dataPointer);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void ClearSoftware()
+        {
+            fixed (long* dataPointer = this.data)
+            {
+                ClearSoftware(dataPointer);
             }
         }
 
