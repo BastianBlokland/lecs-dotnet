@@ -41,7 +41,7 @@ namespace Lecs.Memory
         public Mask256 AsMutable() =>
             // Note: Its safe to cast these around like this because they have identical memory layout
             // and this returns a COPY so you won't be able to change the original
-            Unsafe.As<ReadOnlyMask256, Mask256>(ref Unsafe.AsRef(in this));
+            Unsafe.As<ReadOnlyMask256, Mask256>(ref this);
 
         public bool HasAll(in ReadOnlyMask256 other)
         {

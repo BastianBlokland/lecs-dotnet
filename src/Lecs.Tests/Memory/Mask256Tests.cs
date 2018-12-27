@@ -10,6 +10,22 @@ namespace Lecs.Tests.Memory
     public sealed class Mask256Tests
     {
         [AvxFact]
+        public void Mask256_AsMutable_WorksAsExpected()
+        {
+            var readOnlyMask = ReadOnlyMask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
+            var mutableMask = readOnlyMask.AsMutable();
+            Assert.True(readOnlyMask.Equals(mutableMask));
+        }
+
+        [AvxFact]
+        public void Mask256_AsReadOnly_WorksAsExpected()
+        {
+            var mutableMask = Mask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
+            var readOnlyMask = mutableMask.AsReadOnly();
+            Assert.True(mutableMask.Equals(readOnlyMask));
+        }
+
+        [AvxFact]
         public void Mask256_NotHasAny_FindsAny_Avx()
         {
             var maskA = Mask256.Create(bit: 100);
