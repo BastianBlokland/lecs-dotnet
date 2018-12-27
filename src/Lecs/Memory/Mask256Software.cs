@@ -107,18 +107,18 @@ namespace Lecs.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static string ToStringSoftware(long* dataPointer)
         {
-            var stringBuilder = new StringBuilder(capacity: 256);
+            Span<char> chars = stackalloc char[256];
             for (int i = 0; i < 4; i++)
             {
                 long mask = 1L;
                 for (int j = 0; j < 64; j++)
                 {
-                    stringBuilder.Append((dataPointer[i] & mask) != 0 ? "1" : "0");
+                    chars[i * 64 + j] = (dataPointer[i] & mask) != 0 ? '1' : '0';
                     mask <<= 1;
                 }
             }
 
-            return stringBuilder.ToString();
+            return new string(chars);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
