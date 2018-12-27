@@ -5,7 +5,9 @@
       "xmlHeader": true,
       "documentInterfaces": true,
       "documentExposedElements": true,
-      "documentInternalElements": false
+      "documentInternalElements": false,
+      "documentPrivateElements": false,
+      "documentPrivateFields": false
     },
     "layoutRules": {
       "newlineAtEndOfFile": "require",

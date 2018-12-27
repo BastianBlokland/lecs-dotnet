@@ -10,7 +10,7 @@ namespace Lecs.Tests.Memory
     public sealed class Mask256Tests
     {
         [AvxFact]
-        public void Mask256_AsMutable_WorksAsExpected()
+        public static void Mask256_AsMutable_WorksAsExpected()
         {
             var readOnlyMask = ReadOnlyMask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
             var mutableMask = readOnlyMask.AsMutable();
@@ -18,7 +18,7 @@ namespace Lecs.Tests.Memory
         }
 
         [AvxFact]
-        public void Mask256_AsReadOnly_WorksAsExpected()
+        public static void Mask256_AsReadOnly_WorksAsExpected()
         {
             var mutableMask = Mask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
             var readOnlyMask = mutableMask.AsReadOnly();
@@ -26,7 +26,7 @@ namespace Lecs.Tests.Memory
         }
 
         [AvxFact]
-        public void Mask256_NotHasAny_FindsAny_Avx()
+        public static void Mask256_NotHasAny_FindsAny_Avx()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
@@ -34,7 +34,7 @@ namespace Lecs.Tests.Memory
         }
 
         [AvxFact]
-        public void Mask256_NotHasAny_DoesntFindsAny_Avx()
+        public static void Mask256_NotHasAny_DoesntFindsAny_Avx()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
@@ -42,7 +42,7 @@ namespace Lecs.Tests.Memory
         }
 
         [Fact]
-        public void Mask256_NotHasAny_FindsAny_Software()
+        public static void Mask256_NotHasAny_FindsAny_Software()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
@@ -50,7 +50,7 @@ namespace Lecs.Tests.Memory
         }
 
         [Fact]
-        public void Mask256_NotHasAny_DoesntFindsAny_Software()
+        public static void Mask256_NotHasAny_DoesntFindsAny_Software()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
@@ -58,7 +58,7 @@ namespace Lecs.Tests.Memory
         }
 
         [AvxFact]
-        public void Mask256_HasAll_FindsAll_Avx()
+        public static void Mask256_HasAll_FindsAll_Avx()
         {
             var maskA = Mask256.Create(new byte[] { 50, 75, 100, 125 });
             var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
@@ -66,7 +66,7 @@ namespace Lecs.Tests.Memory
         }
 
         [Fact]
-        public void Mask256_HasAll_FindsAll_Software()
+        public static void Mask256_HasAll_FindsAll_Software()
         {
             var maskA = Mask256.Create(new byte[] { 50, 75, 100, 125 });
             var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
@@ -74,7 +74,7 @@ namespace Lecs.Tests.Memory
         }
 
         [AvxFact]
-        public void Mask256_HasAll_DoesntFindAll_Avx()
+        public static void Mask256_HasAll_DoesntFindAll_Avx()
         {
             var maskA = Mask256.Create(new byte[] { 75, 100, 125 });
             var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
@@ -82,7 +82,7 @@ namespace Lecs.Tests.Memory
         }
 
         [Fact]
-        public void Mask256_HasAll_DoesntFindAll_Software()
+        public static void Mask256_HasAll_DoesntFindAll_Software()
         {
             var maskA = Mask256.Create(new byte[] { 75, 100, 125 });
             var maskB = Mask256.Create(new byte[] { 50, 75, 100 });
@@ -90,7 +90,7 @@ namespace Lecs.Tests.Memory
         }
 
         [AvxFact]
-        public void Mask256_HasAny_FindsAny_Avx()
+        public static void Mask256_HasAny_FindsAny_Avx()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
@@ -98,7 +98,7 @@ namespace Lecs.Tests.Memory
         }
 
         [AvxFact]
-        public void Mask256_HasAny_DoesntFindsAny_Avx()
+        public static void Mask256_HasAny_DoesntFindsAny_Avx()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
@@ -106,7 +106,7 @@ namespace Lecs.Tests.Memory
         }
 
         [Fact]
-        public void Mask256_HasAny_FindsAny_Software()
+        public static void Mask256_HasAny_FindsAny_Software()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
@@ -114,7 +114,7 @@ namespace Lecs.Tests.Memory
         }
 
         [Fact]
-        public void Mask256_HasAny_DoesntFindsAny_Software()
+        public static void Mask256_HasAny_DoesntFindsAny_Software()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
@@ -123,7 +123,7 @@ namespace Lecs.Tests.Memory
 
         [Avx2Theory]
         [MemberData(nameof(GetCombinedMasksData))]
-        public void Mask256_CombinedMask_ClearResultsInEmpty_Avx2(Mask256 mask)
+        public static void Mask256_CombinedMask_ClearResultsInEmpty_Avx2(Mask256 mask)
         {
             Assert.False(mask.EqualsAvx2(default(Mask256)));
             mask.ClearAvx2();
@@ -132,7 +132,7 @@ namespace Lecs.Tests.Memory
 
         [Theory]
         [MemberData(nameof(GetCombinedMasksData))]
-        public void Mask256_CombinedMask_ClearResultsInEmpty_Software(Mask256 mask)
+        public static void Mask256_CombinedMask_ClearResultsInEmpty_Software(Mask256 mask)
         {
             Assert.False(mask.EqualsSoftware(default(Mask256)));
             mask.ClearSoftware();
@@ -141,7 +141,7 @@ namespace Lecs.Tests.Memory
 
         [Avx2Theory]
         [MemberData(nameof(GetCombinedMasksData))]
-        public void Mask256_CombinedMask_CanBeAddedAndRemoved_Avx2(Mask256 mask)
+        public static void Mask256_CombinedMask_CanBeAddedAndRemoved_Avx2(Mask256 mask)
         {
             var testMask = Mask256.Create();
 
@@ -157,7 +157,7 @@ namespace Lecs.Tests.Memory
 
         [AvxTheory]
         [MemberData(nameof(GetCombinedMasksData))]
-        public void Mask256_CombinedMask_CanBeAddedAndRemoved_Avx(Mask256 mask)
+        public static void Mask256_CombinedMask_CanBeAddedAndRemoved_Avx(Mask256 mask)
         {
             var testMask = Mask256.Create();
 
@@ -173,7 +173,7 @@ namespace Lecs.Tests.Memory
 
         [Theory]
         [MemberData(nameof(GetCombinedMasksData))]
-        public void Mask256_CombinedMask_CanBeAddedAndRemoved_Software(Mask256 mask)
+        public static void Mask256_CombinedMask_CanBeAddedAndRemoved_Software(Mask256 mask)
         {
             var defaultMask = Mask256.Create();
 
@@ -189,7 +189,7 @@ namespace Lecs.Tests.Memory
 
         [Avx2Theory]
         [MemberData(nameof(GetSingleMasksData))]
-        public void Mask256_SingleMask_InvertedMaskHasAllButOriginal_Avx2(Mask256 mask, byte elementNumber)
+        public static void Mask256_SingleMask_InvertedMaskHasAllButOriginal_Avx2(Mask256 mask, byte elementNumber)
         {
             mask.InvertAvx2();
             for (int i = 0; i < 256; i++)
@@ -204,7 +204,7 @@ namespace Lecs.Tests.Memory
 
         [AvxTheory]
         [MemberData(nameof(GetSingleMasksData))]
-        public void Mask256_SingleMask_InvertedMaskHasAllButOriginal_Avx(Mask256 mask, byte elementNumber)
+        public static void Mask256_SingleMask_InvertedMaskHasAllButOriginal_Avx(Mask256 mask, byte elementNumber)
         {
             mask.InvertAvx();
             for (int i = 0; i < 256; i++)
@@ -219,7 +219,7 @@ namespace Lecs.Tests.Memory
 
         [Theory]
         [MemberData(nameof(GetSingleMasksData))]
-        public void Mask256_SingleMask_InvertedMaskHasAllButOriginal_Software(Mask256 mask, byte elementNumber)
+        public static void Mask256_SingleMask_InvertedMaskHasAllButOriginal_Software(Mask256 mask, byte elementNumber)
         {
             mask.InvertSoftware();
             for (int i = 0; i < 256; i++)
@@ -233,7 +233,7 @@ namespace Lecs.Tests.Memory
         }
 
         [Fact]
-        public void Mask256_ToString_ExpectedOutput()
+        public static void Mask256_ToString_ExpectedOutput()
         {
             var mask = Mask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
             var expectedString =

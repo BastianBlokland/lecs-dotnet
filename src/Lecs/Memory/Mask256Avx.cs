@@ -4,9 +4,12 @@ using System.Runtime.Intrinsics.X86;
 
 namespace Lecs.Memory
 {
+    /// <summary>
+    /// Partial containing Avx intrinsics logic.
+    /// </summary>
     public unsafe partial struct Mask256
     {
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool HasAllAvx(long* dataPointerA, long* dataPointerB)
         {
@@ -28,7 +31,7 @@ namespace Lecs.Memory
             return Avx.TestC(vectorA, vectorB);
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool HasAnyAvx(long* dataPointerA, long* dataPointerB)
         {
@@ -59,7 +62,7 @@ namespace Lecs.Memory
             return Avx.TestNotZAndNotC(vectorA, vectorB);
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool NotHasAnyAvx(long* dataPointerA, long* dataPointerB)
         {
@@ -81,7 +84,7 @@ namespace Lecs.Memory
             return Avx.TestZ(vectorA, vectorB);
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddAvx(long* dataPointerA, long* dataPointerB)
         {
@@ -111,7 +114,7 @@ namespace Lecs.Memory
             Avx.Store(dataPointer1Plus2, result);
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveAvx(long* dataPointerA, long* dataPointerB)
         {
@@ -141,7 +144,7 @@ namespace Lecs.Memory
             Avx.Store(dataPointer1Plus2, result);
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void InvertAvx(long* dataPointer)
         {
@@ -174,7 +177,7 @@ namespace Lecs.Memory
             Avx.Store(dataPointerPlus2, result);
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool EqualsAvx(long* dataPointerA, long* dataPointerB)
         {
@@ -208,71 +211,71 @@ namespace Lecs.Memory
             return Avx.MoveMask(elementWiseResult) == 0b_1111_1111_1111_1111;
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool HasAllAvx(in Mask256 other)
         {
-            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
             {
                 return HasAllAvx(dataPointerA, dataPointerB);
             }
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool HasAnyAvx(in Mask256 other)
         {
-            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
             {
                 return HasAnyAvx(dataPointerA, dataPointerB);
             }
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool NotHasAnyAvx(in Mask256 other)
         {
-            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
             {
                 return NotHasAnyAvx(dataPointerA, dataPointerB);
             }
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void AddAvx(in Mask256 other)
         {
-            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
             {
                 AddAvx(dataPointerA, dataPointerB);
             }
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void RemoveAvx(in Mask256 other)
         {
-            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
             {
                 RemoveAvx(dataPointerA, dataPointerB);
             }
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void InvertAvx()
         {
-            fixed (long* dataPointer = this.data)
+            fixed (long* dataPointer = this.Data)
             {
                 InvertAvx(dataPointer);
             }
         }
 
-        /// <summary> NOTE: Query for support before calling this! </summary>
+        /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool EqualsAvx(in Mask256 other)
         {
-            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
             {
                 return EqualsAvx(dataPointerA, dataPointerB);
             }

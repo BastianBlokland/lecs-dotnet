@@ -4,10 +4,20 @@
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
 
     <!-- 'Curly brackets must not be omitted' -->
+    <!-- Reason is that it adds too much unnecessary whitespace in my opinion -->
     <Rule Id="SA1503" Action="None" />
 
     <!-- 'The file header is missing or not located at the top of the file' -->
+    <!-- Reason is that file-headers are very 90s :) -->
     <Rule Id="SA1633" Action="None" />
+
+    <!-- 'Using directives must be ordered alphabetically by the namespaces' -->
+    <!-- Reason is that i prefer to keep external and internal usings seperate -->
+    <Rule Id="SA1210" Action="None" />
+
+    <!-- 'Closing parenthesis must be followed by a space' -->
+    <!-- Reason is that StyleCop doesn't understand new c#7 tuples yet and compains -->
+    <Rule Id="SA1009" Action="None" />
 
   </Rules>
 
