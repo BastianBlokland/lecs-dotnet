@@ -109,18 +109,18 @@ namespace Lecs.Tests.Memory
         [MemberData(nameof(GetCombinedMasksData))]
         public void Mask256_CombinedMask_ClearResultsInEmpty_Avx2(Mask256 mask)
         {
-            Assert.False(mask.EqualsAvx2(in Mask256.Empty));
+            Assert.False(mask.EqualsAvx2(default(Mask256)));
             mask.ClearAvx2();
-            Assert.True(mask.EqualsAvx2(in Mask256.Empty));
+            Assert.True(mask.EqualsAvx2(default(Mask256)));
         }
 
         [Theory]
         [MemberData(nameof(GetCombinedMasksData))]
         public void Mask256_CombinedMask_ClearResultsInEmpty_Software(Mask256 mask)
         {
-            Assert.False(mask.EqualsSoftware(in Mask256.Empty));
+            Assert.False(mask.EqualsSoftware(default(Mask256)));
             mask.ClearSoftware();
-            Assert.True(mask.EqualsSoftware(in Mask256.Empty));
+            Assert.True(mask.EqualsSoftware(default(Mask256)));
         }
 
         [Avx2Theory]
@@ -134,7 +134,7 @@ namespace Lecs.Tests.Memory
             Assert.True(testMask.HasAllAvx(in mask));
 
             testMask.Remove(mask);
-            Assert.True(testMask.EqualsAvx2(in Mask256.Empty));
+            Assert.True(testMask.EqualsAvx2(default(Mask256)));
             Assert.False(testMask.EqualsAvx2(in mask));
             Assert.False(testMask.HasAnyAvx(in mask));
         }
@@ -150,7 +150,7 @@ namespace Lecs.Tests.Memory
             Assert.True(testMask.HasAllAvx(in mask));
 
             testMask.Remove(mask);
-            Assert.True(testMask.EqualsAvx(in Mask256.Empty));
+            Assert.True(testMask.EqualsAvx(default(Mask256)));
             Assert.False(testMask.EqualsAvx(in mask));
             Assert.False(testMask.HasAnyAvx(in mask));
         }
@@ -166,7 +166,7 @@ namespace Lecs.Tests.Memory
             Assert.True(defaultMask.HasAllSoftware(in mask));
 
             defaultMask.Remove(in mask);
-            Assert.True(defaultMask.EqualsSoftware(in Mask256.Empty));
+            Assert.True(defaultMask.EqualsSoftware(default(Mask256)));
             Assert.False(defaultMask.EqualsSoftware(in mask));
             Assert.False(defaultMask.HasAnySoftware(in mask));
         }
@@ -241,7 +241,7 @@ namespace Lecs.Tests.Memory
         {
             for (int i = 0; i < 256; i++)
             {
-                var mask = Mask256.Create((byte)i, isMutable: false);
+                var mask = Mask256.Create((byte)i);
                 yield return (mask, (byte)i);
             }
         }
@@ -254,7 +254,7 @@ namespace Lecs.Tests.Memory
                 for (int j = 0; j < bits.Length; j++)
                     bits[j] = (byte)((i + j) % 256);
 
-                yield return Mask256.Create(bits, isMutable: false);
+                yield return Mask256.Create(bits);
             }
         }
     }

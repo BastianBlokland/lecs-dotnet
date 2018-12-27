@@ -320,7 +320,7 @@ namespace Lecs.Benchmark.Memory
             {
                 referenceMasks[i] = ReferenceMask64.Create((byte)(testData[i] % 64));
 
-                masks[i] = Mask256.Create(testData[i], isMutable: false);
+                masks[i] = Mask256.Create(testData[i]);
             }
 
             // Combine masks to create more realistic masks

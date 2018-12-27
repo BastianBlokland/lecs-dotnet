@@ -1,46 +1,52 @@
 using System;
-using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lecs.Memory
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 32)] // 4 * 8 byte = 32 byte
     public unsafe partial struct Mask256 : IEquatable<Mask256>
     {
-        private static Mask256 empty = new Mask256(isMutable: false);
-
-        private readonly bool isMutable;
-        private fixed long data[4]; // 4 * 64 bit = 256 bit
-
-        internal Mask256(bool isMutable)
-        {
-            this.isMutable = isMutable;
-        }
-
-        public static ref Mask256 Empty => ref empty;
-
-        public bool IsMutable => isMutable;
+        internal fixed long data[4]; // 4 * 64 bit = 256 bit
 
         public static bool operator ==(in Mask256 a, in Mask256 b) => a.Equals(in b);
 
         public static bool operator !=(in Mask256 a, in Mask256 b) => !a.Equals(in b);
 
-        public static Mask256 Create(bool isMutable = true) => new Mask256(isMutable);
+        public static Mask256 Create() => default(Mask256);
 
-        public static Mask256 Create(byte bit, bool isMutable = true)
+        public static Mask256 Create(byte bit)
         {
-            var result = new Mask256(isMutable);
-            Mask256.SetBitSoftware(result.data, bit);
+            var result = default(Mask256);
+            SetBitSoftware(result.data, bit);
             return result;
         }
 
-        public static Mask256 Create(ReadOnlySpan<byte> bits, bool isMutable = true)
+        public static Mask256 Create(ReadOnlySpan<byte> bits)
         {
-            var result = new Mask256(isMutable);
-            Mask256.SetBitsSoftware(result.data, bits);
+            var result = default(Mask256);
+            SetBitsSoftware(result.data, bits);
             return result;
         }
+
+        public ReadOnlyMask256 AsReadOnly() =>
+            // Note: Its safe to cast these around like this because they have identical memory layout
+            // and this returns a COPY so you won't be able to change the original
+            Unsafe.As<Mask256, ReadOnlyMask256>(ref Unsafe.AsRef(in this));
 
         public bool HasAll(in Mask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                if (Avx.IsSupported)
+                    return HasAllAvx(dataPointerA, dataPointerB);
+                else
+                    return HasAllSoftware(dataPointerA, dataPointerB);
+            }
+        }
+
+        public bool HasAll(in ReadOnlyMask256 other)
         {
             fixed (long* dataPointerA = this.data, dataPointerB = other.data)
             {
@@ -62,7 +68,29 @@ namespace Lecs.Memory
             }
         }
 
+        public bool HasAny(in ReadOnlyMask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                if (Avx.IsSupported)
+                    return HasAnyAvx(dataPointerA, dataPointerB);
+                else
+                    return HasAnySoftware(dataPointerA, dataPointerB);
+            }
+        }
+
         public bool NotHasAny(in Mask256 other)
+        {
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                if (Avx.IsSupported)
+                    return NotHasAnyAvx(dataPointerA, dataPointerB);
+                else
+                    return NotHasAnySoftware(dataPointerA, dataPointerB);
+            }
+        }
+
+        public bool NotHasAny(in ReadOnlyMask256 other)
         {
             fixed (long* dataPointerA = this.data, dataPointerB = other.data)
             {
@@ -75,8 +103,20 @@ namespace Lecs.Memory
 
         public void Add(in Mask256 other)
         {
-            Debug.Assert(isMutable);
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                if (Avx2.IsSupported)
+                    AddAvx2(dataPointerA, dataPointerB);
+                else
+                if (Avx.IsSupported)
+                    AddAvx(dataPointerA, dataPointerB);
+                else
+                    AddSoftware(dataPointerA, dataPointerB);
+            }
+        }
 
+        public void Add(in ReadOnlyMask256 other)
+        {
             fixed (long* dataPointerA = this.data, dataPointerB = other.data)
             {
                 if (Avx2.IsSupported)
@@ -91,8 +131,20 @@ namespace Lecs.Memory
 
         public void Remove(in Mask256 other)
         {
-            Debug.Assert(isMutable);
+            fixed (long* dataPointerA = this.data, dataPointerB = other.data)
+            {
+                if (Avx2.IsSupported)
+                    RemoveAvx2(dataPointerA, dataPointerB);
+                else
+                if (Avx.IsSupported)
+                    RemoveAvx(dataPointerA, dataPointerB);
+                else
+                    RemoveSoftware(dataPointerA, dataPointerB);
+            }
+        }
 
+        public void Remove(in ReadOnlyMask256 other)
+        {
             fixed (long* dataPointerA = this.data, dataPointerB = other.data)
             {
                 if (Avx2.IsSupported)
@@ -107,8 +159,6 @@ namespace Lecs.Memory
 
         public void Invert()
         {
-            Debug.Assert(isMutable);
-
             fixed (long* dataPointer = this.data)
             {
                 if (Avx2.IsSupported)
@@ -123,8 +173,6 @@ namespace Lecs.Memory
 
         public void Clear()
         {
-            Debug.Assert(isMutable);
-
             fixed (long* dataPointer = this.data)
             {
                 if (Avx2.IsSupported)
