@@ -15,12 +15,29 @@
     <!-- 'Parameter must not span multiple lines' -->
     <Rule Id="SA1118" Action="None" />
 
+    <!-- 'File may only contain a single class' -->
+    <Rule Id="SA1402" Action="None" />
+
+    <!-- 'File name must match first type name' -->
+    <Rule Id="SA1649" Action="None" />
+
+    <!-- 'Using directives must be ordered alphabetically by the namespaces' -->
+    <!-- Reason is that i prefer to keep external and internal usings seperate -->
+    <Rule Id="SA1210" Action="None" />
+
+    <!-- 'Closing parenthesis must be followed by a space' -->
+    <!-- Reason is that StyleCop doesn't understand new c#7 tuples yet and compains -->
+    <Rule Id="SA1009" Action="None" />
+
   </Rules>
 
   <Rules AnalyzerId="FxCop.Analyzers" RuleNamespace="FxCop.Analyzers">
 
     <!-- 'Identifiers should not contain underscores' -->
     <Rule Id="CA1707" Action="None" />
+
+    <!-- 'Override equals and operator equals on value types' -->
+    <Rule Id="CA1815" Action="None" />
 
   </Rules>
 

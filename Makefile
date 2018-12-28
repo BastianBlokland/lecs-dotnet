@@ -12,5 +12,6 @@ test: build
 
 filter=Lecs.Benchmark.*
 benchmark: build
+	rm -rf ./artifacts/benchmark
 	dotnet run -c Release -p src/Lecs.Benchmark/Lecs.Benchmark.csproj \
 	--filter $(filter) --exporters GitHub --artifacts ./artifacts/benchmark
