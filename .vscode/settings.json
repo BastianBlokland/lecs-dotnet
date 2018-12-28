@@ -1,6 +1,15 @@
 {
   // Common plugins
   "dotnet-test-explorer.testProjectPath": "src/Lecs.Tests/Lecs.Tests.csproj",
+  "cSpell.words": [
+    "usings",
+    "intrinsics",
+    "lecs",
+    "vectorizable",
+    "vectorize",
+    "xunit",
+    "structs"
+  ],
 
   // Search settings
   "search.useIgnoreFiles": false,
