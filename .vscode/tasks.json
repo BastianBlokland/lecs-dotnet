@@ -5,7 +5,7 @@
   "tasks": [
     {
       "label": "clean",
-      "command": "dotnet clean src/Lecs.sln",
+      "command": "./ci/clean.sh",
       "type": "shell",
       "group": "build",
       "problemMatcher": "$msCompile"
@@ -13,7 +13,7 @@
     {
       "label": "build",
       "dependsOn": "clean",
-      "command": "dotnet build src/Lecs.sln",
+      "command": "./ci/build.sh",
       "type": "shell",
       "group": {
         "kind": "build",
@@ -24,7 +24,7 @@
     {
       "label": "test",
       "dependsOn": "build",
-      "command": "dotnet test src/Lecs.Tests/Lecs.Tests.csproj",
+      "command": "./ci/test.sh",
       "type": "shell",
       "group": "build",
       "problemMatcher": "$msCompile"
@@ -32,7 +32,7 @@
     {
       "label": "benchmark",
       "dependsOn": "build",
-      "command": "dotnet run -c Release -p src/Lecs.Benchmark/Lecs.Benchmark.csproj --exporters GitHub --artifacts ./artifacts/benchmark",
+      "command": "./ci/benchmark.sh",
       "type": "shell",
       "group": "build",
       "problemMatcher": "$msCompile"
