@@ -17,7 +17,8 @@ namespace Lecs.Memory
     /// Creation is not very fast (turns out its non trivial to vectorize that) so its best to cache
     /// the masks.
     ///
-    /// Prefer using the methods with 'in' semantics as it avoids copying this (relatively big) unnecessarily.
+    /// Prefer using the methods with 'in' semantics as it avoids copying this (relatively big) struct
+    /// unnecessarily.
     /// </remarks>
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 32)] // 4 * 8 byte = 32 byte
     public unsafe partial struct Mask256 : IEquatable<Mask256>, IEquatable<ReadOnlyMask256>
@@ -189,8 +190,7 @@ namespace Lecs.Memory
         /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
-        /// <returns>True if this mask doesn't have any bit of the given mask set, otherwise false.
-        /// </returns>
+        /// <returns>True if this mask doesn't have any bit of the given mask set, otherwise false.</returns>
         public bool NotHasAny(in ReadOnlyMask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -324,7 +324,7 @@ namespace Lecs.Memory
         }
 
         /// <summary>
-        /// Create a string representation of the current bits. Example output: 0101010104212.
+        /// Create a string representation of the current bits. Example output: 0101010100101.
         /// </summary>
         /// <returns>New string containing text representation of current data.</returns>
         public override string ToString()

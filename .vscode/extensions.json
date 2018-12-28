@@ -3,6 +3,7 @@
     "ms-vscode.csharp",
     "editorconfig.editorconfig",
     "formulahendry.dotnet-test-explorer",
-    "k--kato.docomment"
+    "k--kato.docomment",
+    "streetsidesoftware.code-spell-checker"
   ]
 }
