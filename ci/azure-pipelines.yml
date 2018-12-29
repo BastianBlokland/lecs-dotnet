@@ -20,5 +20,13 @@ steps:
   displayName: 'Publish test results to azure pipelines'
   inputs:
     testResultsFormat: 'xUnit'
-    testResultsFiles: 'artifacts/xunit.results.xml'
+    testResultsFiles: '$(System.DefaultWorkingDirectory)/artifacts/xunit.results.xml'
+  condition: always()
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish test coverage results to azure pipelines'
+  inputs:
+    codeCoverageTool: 'cobertura'
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/artifacts/coverage.cobertura.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/artifacts'
+    failIfCoverageEmpty: true
   condition: always()
