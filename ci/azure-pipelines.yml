@@ -6,27 +6,30 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
-  sdk: '3.0.100-preview-009812'
+  PATH: '/home/vsts/.dotnet:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 steps:
-- task: DotNetCoreInstaller@0
-  inputs:
-    version: $(sdk)
+- script: ./ci/install.sh
+  displayName: 'Install dependencies'
+
 - script: ./ci/build_release.sh
   displayName: 'Build'
+
 - script: ./ci/test.sh
   displayName: 'Test'
+
 - task: PublishTestResults@2
   displayName: 'Publish test results to azure pipelines'
   inputs:
     testResultsFormat: 'xUnit'
     testResultsFiles: '$(System.DefaultWorkingDirectory)/artifacts/xunit.results.xml'
   condition: always()
+
 - task: PublishCodeCoverageResults@1
   displayName: 'Publish test coverage results to azure pipelines'
   inputs:
     codeCoverageTool: 'cobertura'
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/artifacts/coverage.cobertura.xml'
-    reportDirectory: '$(System.DefaultWorkingDirectory)/artifacts'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/artifacts/coverage_report'
     failIfCoverageEmpty: true
   condition: always()

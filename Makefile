@@ -1,6 +1,9 @@
 .PHONY: clean build test benchmark
 default: build
 
+install:
+	./ci/install.sh
+
 clean:
 	./ci/clean.sh
 
