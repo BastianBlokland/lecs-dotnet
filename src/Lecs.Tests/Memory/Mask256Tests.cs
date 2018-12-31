@@ -145,11 +145,11 @@ namespace Lecs.Tests.Memory
         {
             var testMask = Mask256.Create();
 
-            testMask.Add(in mask);
+            testMask.AddAvx2(in mask);
             Assert.True(testMask.EqualsAvx2(in mask));
             Assert.True(testMask.HasAllAvx(in mask));
 
-            testMask.Remove(mask);
+            testMask.RemoveAvx2(mask);
             Assert.True(testMask.EqualsAvx2(default(Mask256)));
             Assert.False(testMask.EqualsAvx2(in mask));
             Assert.False(testMask.HasAnyAvx(in mask));
@@ -161,11 +161,11 @@ namespace Lecs.Tests.Memory
         {
             var testMask = Mask256.Create();
 
-            testMask.Add(in mask);
+            testMask.AddAvx(in mask);
             Assert.True(testMask.EqualsAvx(in mask));
             Assert.True(testMask.HasAllAvx(in mask));
 
-            testMask.Remove(mask);
+            testMask.RemoveAvx(mask);
             Assert.True(testMask.EqualsAvx(default(Mask256)));
             Assert.False(testMask.EqualsAvx(in mask));
             Assert.False(testMask.HasAnyAvx(in mask));
@@ -177,11 +177,11 @@ namespace Lecs.Tests.Memory
         {
             var defaultMask = Mask256.Create();
 
-            defaultMask.Add(in mask);
+            defaultMask.AddSoftware(in mask);
             Assert.True(defaultMask.EqualsSoftware(in mask));
             Assert.True(defaultMask.HasAllSoftware(in mask));
 
-            defaultMask.Remove(in mask);
+            defaultMask.RemoveSoftware(in mask);
             Assert.True(defaultMask.EqualsSoftware(default(Mask256)));
             Assert.False(defaultMask.EqualsSoftware(in mask));
             Assert.False(defaultMask.HasAnySoftware(in mask));
