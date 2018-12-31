@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
@@ -32,6 +33,7 @@ namespace Lecs.Memory
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
         /// <returns>True if the masks are equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Implemention already tested
         public static bool operator ==(in Mask256 a, in Mask256 b) => a.Equals(in b);
 
         /// <summary>
@@ -41,6 +43,7 @@ namespace Lecs.Memory
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
         /// <returns>True if the masks are equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Implemention already tested
         public static bool operator ==(in Mask256 a, in ReadOnlyMask256 b) => a.Equals(in b);
 
         /// <summary>
@@ -50,6 +53,7 @@ namespace Lecs.Memory
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
         /// <returns>True if the masks are unequal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Implemention already tested
         public static bool operator !=(in Mask256 a, in Mask256 b) => !a.Equals(in b);
 
         /// <summary>
@@ -59,6 +63,7 @@ namespace Lecs.Memory
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
         /// <returns>True if the masks are unequal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Implemention already tested
         public static bool operator !=(in Mask256 a, in ReadOnlyMask256 b) => !a.Equals(in b);
 
         /// <summary>
@@ -106,6 +111,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if it has all bits, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public bool HasAll(in Mask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -123,6 +129,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if it has all bits, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public bool HasAll(in ReadOnlyMask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -140,6 +147,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if this mask has any bit of the given mask set, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public bool HasAny(in Mask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -157,6 +165,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if this mask has any bit of the given mask set, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public bool HasAny(in ReadOnlyMask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -174,6 +183,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if this mask doesn't have any bit of the given mask set, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public bool NotHasAny(in Mask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -191,6 +201,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if this mask doesn't have any bit of the given mask set, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public bool NotHasAny(in ReadOnlyMask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -207,6 +218,7 @@ namespace Lecs.Memory
         /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Other mask containing the bits to set.</param>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public void Add(in Mask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -226,6 +238,7 @@ namespace Lecs.Memory
         /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Other mask containing the bits to set.</param>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public void Add(in ReadOnlyMask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -245,6 +258,7 @@ namespace Lecs.Memory
         /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Other mask containing the bits to unset.</param>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public void Remove(in Mask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -264,6 +278,7 @@ namespace Lecs.Memory
         /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Other mask containing the bits to unset.</param>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public void Remove(in ReadOnlyMask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -281,6 +296,7 @@ namespace Lecs.Memory
         /// <summary>
         /// Invert all the bits in this mask.
         /// </summary>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public void Invert()
         {
             fixed (long* dataPointer = this.Data)
@@ -298,6 +314,7 @@ namespace Lecs.Memory
         /// <summary>
         /// Unset all bits in this mask.
         /// </summary>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public void Clear()
         {
             fixed (long* dataPointer = this.Data)
@@ -360,6 +377,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask to compare.</param>
         /// <returns>True if equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public bool Equals(in Mask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -380,6 +398,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask to compare.</param>
         /// <returns>True if equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         public bool Equals(in ReadOnlyMask256 other)
         {
             fixed (long* dataPointerA = this.Data, dataPointerB = other.Data)
@@ -400,6 +419,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask to compare.</param>
         /// <returns>True if equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         bool IEquatable<Mask256>.Equals(Mask256 other) => this.Equals(other);
 
         /// <summary>
@@ -408,6 +428,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask to compare.</param>
         /// <returns>True if equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         bool IEquatable<ReadOnlyMask256>.Equals(ReadOnlyMask256 other) => this.Equals(other);
     }
 }

@@ -6,22 +6,30 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
-  sdk: '3.0.100-preview-009812'
-  buildConfiguration: 'Release'
-  sln: './src/Lecs.sln'
-  tests: './src/Lecs.Tests/Lecs.Tests.csproj'
+  PATH: '/home/vsts/.dotnet:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 steps:
-- task: DotNetCoreInstaller@0
-  inputs:
-    version: $(sdk)
-- script: dotnet build --configuration $(buildConfiguration) /p:TreatWarningsAsErrors=true /warnaserror $(sln)
-  displayName: 'dotnet build $(buildConfiguration)'
-- script: dotnet test $(tests) --logger "xunit;LogFileName=TestResults.xml"
-  displayName: 'dotnet test'
+- script: ./ci/install.sh
+  displayName: 'Install dependencies'
+
+- script: ./ci/build_release.sh
+  displayName: 'Build'
+
+- script: ./ci/test.sh
+  displayName: 'Test'
+
 - task: PublishTestResults@2
-  displayName: 'publish test results to azure pipelines'
+  displayName: 'Publish test results to azure pipelines'
   inputs:
     testResultsFormat: 'xUnit'
-    testResultsFiles: '**/TestResults.xml'
+    testResultsFiles: '$(System.DefaultWorkingDirectory)/artifacts/xunit.results.xml'
+  condition: always()
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish test coverage results to azure pipelines'
+  inputs:
+    codeCoverageTool: 'cobertura'
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/artifacts/coverage.cobertura.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/artifacts/coverage_report'
+    failIfCoverageEmpty: true
   condition: always()

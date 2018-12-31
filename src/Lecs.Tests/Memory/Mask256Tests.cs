@@ -9,20 +9,59 @@ namespace Lecs.Tests.Memory
 {
     public sealed class Mask256Tests
     {
-        [AvxFact]
-        public static void Mask256_AsMutable_WorksAsExpected()
+        [Theory]
+        [MemberData(nameof(GetSingleMasksData))]
+        public static void ReadOnlyMask256_Equals_IsEqualToMask256(Mask256 mask, byte elementNumber)
+        {
+            var readOnlyMask = ReadOnlyMask256.Create(elementNumber);
+            Assert.True(readOnlyMask.Equals(in mask));
+            Assert.True(mask.Equals(in readOnlyMask));
+            Assert.Equal(mask.GetHashCode(), readOnlyMask.GetHashCode());
+
+            Assert.True(readOnlyMask.Equals((object)mask));
+            Assert.True(mask.Equals((object)readOnlyMask));
+        }
+
+        [Fact]
+        public static void ReadOnlyMask256_Empty_IsEqualToDefaultMask()
+        {
+            var defaultMask = Mask256.Create();
+            Assert.True(defaultMask.Equals(in ReadOnlyMask256.Empty));
+
+            var readOnlyDefaultMask = default(ReadOnlyMask256);
+            Assert.True(readOnlyDefaultMask.Equals(in ReadOnlyMask256.Empty));
+        }
+
+        [Fact]
+        public static void ReadOnlyMask256_AsMutable_WorksAsExpected()
         {
             var readOnlyMask = ReadOnlyMask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
             var mutableMask = readOnlyMask.AsMutable();
             Assert.True(readOnlyMask.Equals(mutableMask));
+            Assert.Equal(readOnlyMask.GetHashCode(), mutableMask.GetHashCode());
         }
 
-        [AvxFact]
+        [Fact]
+        public static void ReadOnlyMask256_Equals_IncorrectTypeIsUnequal()
+        {
+            var floatVal = 1f;
+            Assert.False(ReadOnlyMask256.Empty.Equals(floatVal));
+        }
+
+        [Fact]
+        public static void Mask256_Equals_IncorrectTypeIsUnequal()
+        {
+            var floatVal = 1f;
+            Assert.False(default(Mask256).Equals(floatVal));
+        }
+
+        [Fact]
         public static void Mask256_AsReadOnly_WorksAsExpected()
         {
             var mutableMask = Mask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
             var readOnlyMask = mutableMask.AsReadOnly();
             Assert.True(mutableMask.Equals(readOnlyMask));
+            Assert.Equal(mutableMask.GetHashCode(), readOnlyMask.GetHashCode());
         }
 
         [AvxFact]
@@ -33,20 +72,20 @@ namespace Lecs.Tests.Memory
             Assert.False(maskA.NotHasAnyAvx(in maskB));
         }
 
-        [AvxFact]
-        public static void Mask256_NotHasAny_DoesntFindsAny_Avx()
-        {
-            var maskA = Mask256.Create(bit: 100);
-            var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
-            Assert.True(maskA.NotHasAnyAvx(in maskB));
-        }
-
         [Fact]
         public static void Mask256_NotHasAny_FindsAny_Software()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
             Assert.False(maskA.NotHasAnySoftware(in maskB));
+        }
+
+        [AvxFact]
+        public static void Mask256_NotHasAny_DoesntFindsAny_Avx()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
+            Assert.True(maskA.NotHasAnyAvx(in maskB));
         }
 
         [Fact]
@@ -97,20 +136,20 @@ namespace Lecs.Tests.Memory
             Assert.True(maskA.HasAnyAvx(in maskB));
         }
 
-        [AvxFact]
-        public static void Mask256_HasAny_DoesntFindsAny_Avx()
-        {
-            var maskA = Mask256.Create(bit: 100);
-            var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
-            Assert.False(maskA.HasAnyAvx(in maskB));
-        }
-
         [Fact]
         public static void Mask256_HasAny_FindsAny_Software()
         {
             var maskA = Mask256.Create(bit: 100);
             var maskB = Mask256.Create(new byte[] { 50, 75, 100, 125 });
             Assert.True(maskA.HasAnySoftware(in maskB));
+        }
+
+        [AvxFact]
+        public static void Mask256_HasAny_DoesntFindsAny_Avx()
+        {
+            var maskA = Mask256.Create(bit: 100);
+            var maskB = Mask256.Create(new byte[] { 50, 75, 125 });
+            Assert.False(maskA.HasAnyAvx(in maskB));
         }
 
         [Fact]
@@ -145,11 +184,11 @@ namespace Lecs.Tests.Memory
         {
             var testMask = Mask256.Create();
 
-            testMask.Add(in mask);
+            testMask.AddAvx2(in mask);
             Assert.True(testMask.EqualsAvx2(in mask));
             Assert.True(testMask.HasAllAvx(in mask));
 
-            testMask.Remove(mask);
+            testMask.RemoveAvx2(mask);
             Assert.True(testMask.EqualsAvx2(default(Mask256)));
             Assert.False(testMask.EqualsAvx2(in mask));
             Assert.False(testMask.HasAnyAvx(in mask));
@@ -161,11 +200,11 @@ namespace Lecs.Tests.Memory
         {
             var testMask = Mask256.Create();
 
-            testMask.Add(in mask);
+            testMask.AddAvx(in mask);
             Assert.True(testMask.EqualsAvx(in mask));
             Assert.True(testMask.HasAllAvx(in mask));
 
-            testMask.Remove(mask);
+            testMask.RemoveAvx(mask);
             Assert.True(testMask.EqualsAvx(default(Mask256)));
             Assert.False(testMask.EqualsAvx(in mask));
             Assert.False(testMask.HasAnyAvx(in mask));
@@ -177,11 +216,11 @@ namespace Lecs.Tests.Memory
         {
             var defaultMask = Mask256.Create();
 
-            defaultMask.Add(in mask);
+            defaultMask.AddSoftware(in mask);
             Assert.True(defaultMask.EqualsSoftware(in mask));
             Assert.True(defaultMask.HasAllSoftware(in mask));
 
-            defaultMask.Remove(in mask);
+            defaultMask.RemoveSoftware(in mask);
             Assert.True(defaultMask.EqualsSoftware(default(Mask256)));
             Assert.False(defaultMask.EqualsSoftware(in mask));
             Assert.False(defaultMask.HasAnySoftware(in mask));
@@ -236,6 +275,15 @@ namespace Lecs.Tests.Memory
         public static void Mask256_ToString_ExpectedOutput()
         {
             var mask = Mask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
+            var expectedString =
+                "0000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000001";
+            Assert.Equal(expectedString, mask.ToString());
+        }
+
+        [Fact]
+        public static void ReadOnlyMask256_ToString_ExpectedOutput()
+        {
+            var mask = ReadOnlyMask256.Create(new byte[] { 31, 63, 95, 127, 159, 191, 223, 255 });
             var expectedString =
                 "0000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000001";
             Assert.Equal(expectedString, mask.ToString());

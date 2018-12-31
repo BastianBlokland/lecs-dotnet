@@ -1,17 +1,18 @@
 .PHONY: clean build test benchmark
 default: build
 
+install:
+	./ci/install.sh
+
 clean:
-	dotnet clean src/Lecs.sln
+	./ci/clean.sh
 
 build: clean
-	dotnet build src/Lecs.sln
+	./ci/build.sh
 
 test: build
-	dotnet test src/Lecs.Tests/Lecs.Tests.csproj
+	./ci/test.sh
 
 filter=Lecs.Benchmark.*
 benchmark: build
-	rm -rf ./artifacts/benchmark
-	dotnet run -c Release -p src/Lecs.Benchmark/Lecs.Benchmark.csproj \
-	--filter $(filter) --exporters GitHub --artifacts ./artifacts/benchmark
+	FILTER=$(filter) ./ci/benchmark.sh
