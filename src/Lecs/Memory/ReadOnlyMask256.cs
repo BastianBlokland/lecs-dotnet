@@ -40,6 +40,7 @@ namespace Lecs.Memory
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
         /// <returns>True if the masks are equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Implemention already tested
         public static bool operator ==(in ReadOnlyMask256 a, in ReadOnlyMask256 b) => a.Equals(in b);
 
         /// <summary>
@@ -49,6 +50,7 @@ namespace Lecs.Memory
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
         /// <returns>True if the masks are equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Implemention already tested
         public static bool operator ==(in ReadOnlyMask256 a, in Mask256 b) => a.Equals(in b);
 
         /// <summary>
@@ -58,6 +60,7 @@ namespace Lecs.Memory
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
         /// <returns>True if the masks are unequal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Implemention already tested
         public static bool operator !=(in ReadOnlyMask256 a, in ReadOnlyMask256 b) => !a.Equals(in b);
 
         /// <summary>
@@ -67,6 +70,7 @@ namespace Lecs.Memory
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
         /// <returns>True if the masks are unequal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Implemention already tested
         public static bool operator !=(in ReadOnlyMask256 a, in Mask256 b) => !a.Equals(in b);
 
         /// <summary>
@@ -304,6 +308,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask to compare.</param>
         /// <returns>True if equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         bool IEquatable<ReadOnlyMask256>.Equals(ReadOnlyMask256 other) => this.Equals(other);
 
         /// <summary>
@@ -312,6 +317,7 @@ namespace Lecs.Memory
         /// </summary>
         /// <param name="other">Mask to compare.</param>
         /// <returns>True if equal, otherwise false.</returns>
+        [ExcludeFromCodeCoverage] // Individual implementions already tested separately
         bool IEquatable<Mask256>.Equals(Mask256 other) => this.Equals(other);
     }
 }
