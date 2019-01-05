@@ -21,9 +21,10 @@ namespace Lecs.Memory
     /// Prefer using the methods with 'in' semantics as it avoids copying this (relatively big) struct
     /// unnecessarily.
     /// </remarks>
-    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 32)] // 4 * 8 byte = 32 byte
+    [StructLayout(LayoutKind.Explicit, Size = 32)] // 4 * 8 byte = 32 byte
     public unsafe partial struct Mask256 : IEquatable<Mask256>, IEquatable<ReadOnlyMask256>
     {
+        [FieldOffset(0)]
         internal fixed long Data[4]; // 4 * 64 bit = 256 bit
 
         /// <summary>
