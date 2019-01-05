@@ -10,9 +10,9 @@ clean:
 build: clean
 	./ci/build.sh
 
-test: build
+test: clean
 	./ci/test.sh
 
 filter=Lecs.Benchmark.*
-benchmark: build
+benchmark: clean
 	FILTER=$(filter) ./ci/benchmark.sh
