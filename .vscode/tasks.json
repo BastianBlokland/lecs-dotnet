@@ -23,7 +23,7 @@
     },
     {
       "label": "test",
-      "dependsOn": "build",
+      "dependsOn": "clean",
       "command": "./ci/test.sh",
       "type": "shell",
       "group": "build",
@@ -31,7 +31,7 @@
     },
     {
       "label": "benchmark",
-      "dependsOn": "build",
+      "dependsOn": "clean",
       "command": "./ci/benchmark.sh",
       "type": "shell",
       "group": "build",

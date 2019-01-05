@@ -12,11 +12,11 @@ steps:
 - script: ./ci/install.sh
   displayName: 'Install dependencies'
 
-- script: ./ci/build_release.sh
-  displayName: 'Build'
-
 - script: ./ci/test.sh
   displayName: 'Test'
+
+- script: ./ci/release.sh
+  displayName: 'Release'
 
 - task: PublishTestResults@2
   displayName: 'Publish test results to azure pipelines'
