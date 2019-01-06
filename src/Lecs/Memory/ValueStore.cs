@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 
@@ -38,7 +39,7 @@ namespace Lecs.Memory
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(initialCapacity),
-                    $"Must between 1 and {HashHelpers.BiggestPowerOfTwo + 1}'");
+                    $"Must between '1' and '{HashHelpers.BiggestPowerOfTwo + 1}'");
             }
             if (maxLoadFactor <= 0f || maxLoadFactor >= 1f)
             {
@@ -53,11 +54,15 @@ namespace Lecs.Memory
 
         public int Count => this.count;
 
-        public void Set(int key, in T value)
+        public T this[int key]
+        {
+            set => Set(key, value);
+        }
+
+        public SlotToken Set(int key, in T value)
         {
             // Find a slot for this item
             bool exists = this.Find(key, out SlotToken slot);
-
             if (exists)
             {
                 // If it already exists in the store we can just update it
@@ -66,6 +71,7 @@ namespace Lecs.Memory
             else // !exists
             {
                 Debug.Assert(GetKeyRef(slot, this.keys) == FreeKey, "Slot to insert to has to be empty");
+                Debug.Assert(Array.IndexOf(this.keys, key) == -1, "Incorrectly determined that key did not exist yet");
 
                 // Set the key and value to this free slot
                 GetKeyRef(slot, this.keys) = key;
@@ -92,46 +98,73 @@ namespace Lecs.Memory
                     }
                 }
             }
+
+            return slot;
         }
 
-        public void Remove(int key)
+        public void Remove(SlotToken slot)
         {
-            // Find the slot for this item
-            if (!this.Find(key, out SlotToken slot)) // If the key does not exist in the store there is no need to remove it
-                return;
+            // Check if the slot not already free, this is to protect 'count' going too low on misuse.
+            if (GetKeyRef(slot, this.keys) == FreeKey)
+                throw new ArgumentException("Provided slot does not contain a value");
 
             // Decrement count of items in store
             this.count--;
             Debug.Assert(this.count >= 0, "Count should never go negative");
 
-            // Shift the next keys until we find a empty slot or a key that is currently in its desired slot
-            SlotToken nextSlot;
+            // Shift the next keys until we find a empty slot
+            SlotToken curSlot = slot;
+            SlotToken nextSlot = this.GetNextSlot(curSlot);
             while (true)
             {
-                nextSlot = this.GetNextSlot(slot);
-                Debug.Assert(nextSlot != slot, "Unable to find the next slot");
-
                 ref int nextKey = ref GetKeyRef(nextSlot, this.keys);
-                Debug.Assert(nextKey != key, "Either the same key lives in the store twice or we looped the entire store without finding a free-key");
+
+                Debug.Assert(nextKey != GetKeyRef(slot, this.keys), "Key lives in the store twice");
 
                 // If its the end of a chain then we are done shifting
                 if (nextKey == FreeKey)
                     break;
 
-                SlotToken desiredSlot = this.GetDesiredSlot(nextKey);
-                // If this key is already in its desired slot then we are done shiting
-                if (desiredSlot == nextSlot)
-                    break;
+                // If this is a better slot for the next key then shift it over
+                if (IsBetterSlot(nextKey, currentSlot: nextSlot, potentialSlot: curSlot))
+                {
+                    // Shift this slot over
+                    GetKeyRef(curSlot, this.keys) = GetKeyRef(nextSlot, this.keys);
+                    GetValueRef(curSlot, this.values) = GetValueRef(nextSlot, this.values);
 
-                // Shift this slot over
-                GetKeyRef(slot, this.keys) = GetKeyRef(nextSlot, this.keys);
-                GetValueRef(slot, this.values) = GetValueRef(nextSlot, this.values);
+                    // Mark the now empty slot as our 'current'
+                    curSlot = nextSlot;
+                }
 
-                slot = nextSlot;
+                // Update 'nextSlot' to point to one further
+                nextSlot = this.GetNextSlot(nextSlot);
+                Debug.Assert(nextSlot != slot, "We looped the entire store without finding a free-key");
             }
 
-            // Mark slot as now being free
-            GetKeyRef(slot, this.keys) = FreeKey;
+            // Mark the last slot in the chain as now being free
+            Debug.Assert(GetKeyRef(curSlot, this.keys) != FreeKey, "Slot was already free");
+            GetKeyRef(curSlot, this.keys) = FreeKey;
+
+            bool IsBetterSlot(int key, SlotToken currentSlot, SlotToken potentialSlot)
+            {
+                /*
+                D = Desired, C = Current
+                Wrapped case: Better if P < C || P > D
+                    0 C 0 0 0 0 0 D 0
+                Non-wrapped case: Better if P > D && P < C
+                    0 0 0 0 D 0 0 C 0
+                */
+
+                SlotToken desiredSlot = this.GetDesiredSlot(key);
+                if (potentialSlot == desiredSlot)
+                    return true;
+
+                bool wrapped = currentSlot < desiredSlot;
+                if (wrapped)
+                    return potentialSlot < currentSlot || potentialSlot > desiredSlot;
+                else // !wrapped
+                    return potentialSlot > desiredSlot && potentialSlot < currentSlot;
+            }
         }
 
         public void Clear()
@@ -241,6 +274,7 @@ namespace Lecs.Memory
 
         IEnumerator<SlotToken> IEnumerable<SlotToken>.GetEnumerator() => new SlotEnumerator(this.keys);
 
+        [ExcludeFromCodeCoverage] // Non-boxed version already covered
         IEnumerator IEnumerable.GetEnumerator() => new SlotEnumerator(this.keys);
     }
 }

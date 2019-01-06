@@ -51,7 +51,7 @@ namespace Lecs.Memory
                 }
             }
 
-            public bool Equals(SlotToken other) => other.index.Equals(other.index);
+            public bool Equals(SlotToken other) => other.index.Equals(this.index);
         }
     }
 }

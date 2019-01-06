@@ -49,40 +49,41 @@ namespace Lecs.Memory
 
                         // NOTE: We do not check for bounds here because we allocate our keys array
                         // 7 elements bigger then the capacity so its always safe to load 8 keys
+
                         Debug.Assert(this.keys.Length > (index + 7), "Loading outside of the bounds of the keys array");
                         var elements = Avx2.LoadVector256(keysPointer + index);
 
                         var elementEquals = Avx2.CompareEqual(elements, targetReference);
                         switch (Avx2.MoveMask(elementEquals.AsByte()))
                         {
-                            case (int)0xF0000000: // At element 0
+                            case (int)0x0000000F: // At element 0
                                 return true;
 
-                            case (int)0x0F000000: // At element 1
+                            case (int)0x000000F0: // At element 1
                                 index += 1;
                                 return true;
 
-                            case (int)0x00F00000: // At element 2
+                            case (int)0x00000F00: // At element 2
                                 index += 2;
                                 return true;
 
-                            case (int)0x000F0000: // At element 3
+                            case (int)0x0000F000: // At element 3
                                 index += 3;
                                 return true;
 
-                            case (int)0x0000F000: // At element 4
+                            case (int)0x000F0000: // At element 4
                                 index += 4;
                                 return true;
 
-                            case (int)0x00000F00: // At element 5
+                            case (int)0x00F00000: // At element 5
                                 index += 5;
                                 return true;
 
-                            case (int)0x000000F0: // At element 6
+                            case (int)0x0F000000: // At element 6
                                 index += 6;
                                 return true;
 
-                            case (int)0x0000000F: // At element 7
+                            case (int)0xF0000000: // At element 7
                                 index += 7;
                                 return true;
 
@@ -112,7 +113,7 @@ namespace Lecs.Memory
                                             index += i;
                                             return false;
                                         }
-                                        mask <<= 1;
+                                        mask <<= 4;
                                     }
 
                                     Debug.Fail("Found a free element but was unable to determine which one it was");
@@ -122,7 +123,7 @@ namespace Lecs.Memory
                                 index += 8;
 
                                 // Once we reach the end of the data then we wrap
-                                if (index > this.capacity)
+                                if (index >= this.capacity)
                                     index = 0;
                                 break;
 
