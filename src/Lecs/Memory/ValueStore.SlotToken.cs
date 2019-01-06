@@ -15,7 +15,7 @@ namespace Lecs.Memory
         public readonly struct SlotToken : IEquatable<SlotToken>
         {
             /*
-            Note: This struct has to have the same memory layout as a integer because we want to
+            NOTE: This struct has to have the same memory layout as a integer because we want to
             cheaply cast it to integer and vise versa.
             */
 
@@ -28,6 +28,14 @@ namespace Lecs.Memory
 
             public static bool operator !=(SlotToken a, SlotToken b) => !a.Equals(b);
 
+            public static bool operator >(SlotToken a, SlotToken b) => a.index > b.index;
+
+            public static bool operator <(SlotToken a, SlotToken b) => a.index < b.index;
+
+            public static bool operator >=(SlotToken a, SlotToken b) => a.index >= b.index;
+
+            public static bool operator <=(SlotToken a, SlotToken b) => a.index <= b.index;
+
             public override int GetHashCode() => this.index;
 
             public override string ToString() => this.index.ToString(CultureInfo.InvariantCulture);
@@ -36,8 +44,8 @@ namespace Lecs.Memory
             {
                 switch (obj)
                 {
-                    case SlotToken token:
-                        return this.Equals(token);
+                    case SlotToken slot:
+                        return this.Equals(slot);
                     default:
                         return false;
                 }

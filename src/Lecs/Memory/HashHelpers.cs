@@ -6,6 +6,11 @@ namespace Lecs.Memory
     internal static class HashHelpers
     {
         /// <summary>
+        /// Biggest power-of-two that can be represented by a signed integer
+        /// </summary>
+        internal const int BiggestPowerOfTwo = 1073741824;
+
+        /// <summary>
         /// Mix the bits of a integer. Sequential input will result in non-sequential
         /// output and there are no collisions (each input maps to a different output).
         /// </summary>
@@ -45,7 +50,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Get the next power-of-two for given number.
-        /// Note: Number does not need to be a power-of-two itself
+        /// NOTE: Number does not need to be a power-of-two itself
         /// </summary>
         /// <param name="num">Number to get the next power-of-two for</param>
         /// <returns>Next power-of-two</returns>
@@ -53,7 +58,7 @@ namespace Lecs.Memory
         internal static int NextPowerOfTwo(int num)
         {
             Debug.Assert(num >= 0, "Input has to be a positive integer");
-            Debug.Assert(num < 1073741824, "No bigger power-of-two can be represented by an integer");
+            Debug.Assert(num < BiggestPowerOfTwo, "No bigger power-of-two can be represented by an integer");
 
             return RoundUpToPowerOfTwo(num + 1);
         }
@@ -67,7 +72,7 @@ namespace Lecs.Memory
         internal static int RoundUpToPowerOfTwo(int num)
         {
             Debug.Assert(num > 0, "Input has to be a non-zero positive integer");
-            Debug.Assert(num <= 1073741824, "No power-of-two for given num can be represented by an integer");
+            Debug.Assert(num <= BiggestPowerOfTwo, "No power-of-two for given num can be represented by an integer");
 
             /* Details: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
             unchecked

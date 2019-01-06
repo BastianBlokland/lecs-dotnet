@@ -14,10 +14,15 @@ namespace Lecs.Memory
     {
         /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal unsafe bool FindAvx2(int key, out SlotToken slotToken)
+        internal unsafe bool FindAvx2(int key, out SlotToken slot)
         {
-            int hash = HashHelpers.Mix(key);
-            int index = HashHelpers.ModuloPowerOfTwoMinusOne(hash, this.capacityMinusOne);
+            /* NOTE: This assumes that the store is never completely full, if it is then this will
+            loop infinitely */
+
+            slot = this.GetDesiredSlot(key);
+
+            // Create a int 'view' over the token because its easier to deal with.
+            ref int index = ref Unsafe.As<SlotToken, int>(ref slot);
 
             unchecked
             {
@@ -31,7 +36,7 @@ namespace Lecs.Memory
                     {
                         /*
                         Logic here is that we perform a 256 wide equality check and that gives us
-                        8 values of 'FFFF' or '0000' (32 bits of either 1 or 1) in a 256 bit register.
+                        8 values of 'FFFF' or '0000' (32 bits of either 1 or 0) in a 256 bit register.
                         Then with MoveMask we can combine that to a single 32 bit value by taking
                         4 bits from each 32 bit value (bit 7, 15, 23, 31). Because we know that only
                         a single element can be equal to our value we can construct a jump table
@@ -45,54 +50,46 @@ namespace Lecs.Memory
                         // NOTE: We do not check for bounds here because we allocate our keys array
                         // 7 elements bigger then the capacity so its always safe to load 8 keys
                         var elements = Avx2.LoadAlignedVector256(keysPointer + index);
+                        Debug.Assert(this.keys.Length > (index + 7), "Loading outside of the bounds of the keys array");
 
                         var elementEquals = Avx2.CompareEqual(elements, targetReference);
                         switch (Avx2.MoveMask(elementEquals.AsByte()))
                         {
                             case (int)0xF0000000: // At element 0
-                                slotToken = Unsafe.As<int, SlotToken>(ref index);
                                 return true;
 
                             case (int)0x0F000000: // At element 1
                                 index += 1;
-                                slotToken = Unsafe.As<int, SlotToken>(ref index);
                                 return true;
 
                             case (int)0x00F00000: // At element 2
                                 index += 2;
-                                slotToken = Unsafe.As<int, SlotToken>(ref index);
                                 return true;
 
                             case (int)0x000F0000: // At element 3
                                 index += 3;
-                                slotToken = Unsafe.As<int, SlotToken>(ref index);
                                 return true;
 
                             case (int)0x0000F000: // At element 4
                                 index += 4;
-                                slotToken = Unsafe.As<int, SlotToken>(ref index);
                                 return true;
 
                             case (int)0x00000F00: // At element 5
                                 index += 5;
-                                slotToken = Unsafe.As<int, SlotToken>(ref index);
                                 return true;
 
                             case (int)0x000000F0: // At element 6
                                 index += 6;
-                                slotToken = Unsafe.As<int, SlotToken>(ref index);
                                 return true;
 
                             case (int)0x0000000F: // At element 7
                                 index += 7;
-                                slotToken = Unsafe.As<int, SlotToken>(ref index);
                                 return true;
 
                             case (int)0x00000000: // Not found
                                 /*
                                 When we did not find the target key then we check if the next 8 elements
-                                contains a 'free' key, if so that means the target key doesn not exist
-                                in this valuestore.
+                                contains a 'free' key, if so that means the target key does not exist
                                 */
 
                                 // Create a vector that contains the 'FreeKey' 8 times
@@ -100,13 +97,25 @@ namespace Lecs.Memory
                                 var freeReference = Avx2.BroadcastScalarToVector256(freeReferenceScalar);
 
                                 var elementFree = Avx2.CompareEqual(elements, freeReference);
-                                if (Avx2.MoveMask(elementFree.AsByte()) != 0)
+                                var elementFreeMask = Avx2.MoveMask(elementFree.AsByte());
+                                if (elementFreeMask != 0)
                                 {
-                                    /* One of the items was a free-key so we can stop looking for
-                                    the target key. */
+                                    /* One of the items was a free-key, now we find the first free
+                                    key because we want to return which slot was free so this method
+                                    can also be used for insertions*/
 
-                                    slotToken = default(SlotToken);
-                                    return false;
+                                    int mask = 1;
+                                    for (int i = 0; i < 8; i++)
+                                    {
+                                        if ((elementFreeMask & mask) != 0)
+                                        {
+                                            index += i;
+                                            return false;
+                                        }
+                                        mask <<= 1;
+                                    }
+
+                                    Debug.Fail("Found a free element but was unable to determine which one it was");
                                 }
 
                                 // Increment the index to look at the next 8 elements.

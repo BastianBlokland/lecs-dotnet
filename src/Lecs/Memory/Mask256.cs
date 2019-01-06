@@ -29,7 +29,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Compare two masks for equality.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
@@ -39,7 +39,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Compare two masks for equality.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
@@ -49,7 +49,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Compare two masks for inequality.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
@@ -59,7 +59,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Compare two masks for inequality.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="a">Mask to compare.</param>
         /// <param name="b">Mask to compare to.</param>
@@ -102,13 +102,13 @@ namespace Lecs.Memory
         /// </summary>
         /// <returns>ReadOnly copy of this mask.</returns>
         public ReadOnlyMask256 AsReadOnly() =>
-            /* Note: Its safe to cast these around like this because they have identical memory layout
+            /* NOTE: Its safe to cast these around like this because they have identical memory layout
             and this returns a COPY so you won't be able to change the original */
             Unsafe.As<Mask256, ReadOnlyMask256>(ref this);
 
         /// <summary>
         /// Test if this mask has all bits of the other mask set.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if it has all bits, otherwise false.</returns>
@@ -126,7 +126,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Test if this mask has all bits of the other mask set.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if it has all bits, otherwise false.</returns>
@@ -144,7 +144,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Test if this mask has any bit of the other mask set.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if this mask has any bit of the given mask set, otherwise false.</returns>
@@ -162,7 +162,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Test if this mask has any bit of the other mask set.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if this mask has any bit of the given mask set, otherwise false.</returns>
@@ -180,7 +180,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Test if this mask doesn't have any bit of the other mask set.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if this mask doesn't have any bit of the given mask set, otherwise false.</returns>
@@ -198,7 +198,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Test if this mask doesn't have any bit of the other mask set.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Mask containing the bits to check.</param>
         /// <returns>True if this mask doesn't have any bit of the given mask set, otherwise false.</returns>
@@ -216,7 +216,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Set all the bits of the other mask on this mask.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Other mask containing the bits to set.</param>
         [ExcludeFromCodeCoverage] // Individual implementions already tested separately
@@ -236,7 +236,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Set all the bits of the other mask on this mask.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Other mask containing the bits to set.</param>
         [ExcludeFromCodeCoverage] // Individual implementions already tested separately
@@ -256,7 +256,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Unset all the bits of the other mask on this mask.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Other mask containing the bits to unset.</param>
         [ExcludeFromCodeCoverage] // Individual implementions already tested separately
@@ -276,7 +276,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Unset all the bits of the other mask on this mask.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Other mask containing the bits to unset.</param>
         [ExcludeFromCodeCoverage] // Individual implementions already tested separately
@@ -329,7 +329,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Calculate a hashcode for the current data.
-        /// Note: Not very optimized, if required in a high frequency code-path then more time should
+        /// NOTE: Not very optimized, if required in a high frequency code-path then more time should
         /// be invested into looking into a vectorizable solution.
         /// </summary>
         /// <returns>Hashcode to represent the current data.</returns>
@@ -374,7 +374,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Test if data of this mask and given mask are equal.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Mask to compare.</param>
         /// <returns>True if equal, otherwise false.</returns>
@@ -395,7 +395,7 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Test if data of this mask and given mask are equal.
-        /// Note: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
+        /// NOTE: Use with 'in' semantics whenever possible to avoid copying data unnecessarily.
         /// </summary>
         /// <param name="other">Mask to compare.</param>
         /// <returns>True if equal, otherwise false.</returns>

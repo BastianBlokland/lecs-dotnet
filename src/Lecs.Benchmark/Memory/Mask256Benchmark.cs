@@ -142,7 +142,7 @@ namespace Lecs.Benchmark.Memory
     public class Mask256_Add_Benchmark : Mask256_BaseBenchmark
     {
         /*
-        Note: These benchmarks have the side-effect of actually changing the data, which is bad but
+        NOTE: These benchmarks have the side-effect of actually changing the data, which is bad but
         in this case i know that none of the implementations benefit from specific input-data and
         making copies affects the results too much.
         */
@@ -183,7 +183,7 @@ namespace Lecs.Benchmark.Memory
     public class Mask256_Remove_Benchmark : Mask256_BaseBenchmark
     {
         /*
-        Note: These benchmarks have the side-effect of actually changing the data, which is bad but
+        NOTE: These benchmarks have the side-effect of actually changing the data, which is bad but
         in this case i know that none of the implementations benefit from specific input-data and
         making copies affects the results too much.
         */
@@ -224,7 +224,7 @@ namespace Lecs.Benchmark.Memory
     public class Mask256_Invert_Benchmark : Mask256_BaseBenchmark
     {
         /*
-        Note: These benchmarks have the side-effect of actually changing the data, which is bad but
+        NOTE: These benchmarks have the side-effect of actually changing the data, which is bad but
         in this case i know that none of the implementations benefit from specific input-data and
         making copies affects the results too much.
         */
@@ -265,7 +265,7 @@ namespace Lecs.Benchmark.Memory
     public class Mask256_Clear_Benchmark : Mask256_BaseBenchmark
     {
         /*
-        Note: These benchmarks have the side-effect of actually changing the data, which is bad but
+        NOTE: These benchmarks have the side-effect of actually changing the data, which is bad but
         in this case i know that none of the implementations benefit from the input-data being clear
         and making copies affects the results too much.
         */
