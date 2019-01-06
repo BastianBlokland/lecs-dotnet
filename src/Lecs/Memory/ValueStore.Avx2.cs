@@ -16,8 +16,8 @@ namespace Lecs.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal unsafe bool FindAvx2(int key, out SlotToken slotToken)
         {
-            int hash = Hash(key);
-            int index = this.ModuloCapacity(hash);
+            int hash = HashHelpers.Mix(key);
+            int index = HashHelpers.ModuloPowerOfTwoMinusOne(hash, this.capacityMinusOne);
 
             unchecked
             {

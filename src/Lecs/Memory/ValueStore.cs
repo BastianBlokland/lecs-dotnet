@@ -18,25 +18,6 @@ namespace Lecs.Memory
 
         internal const int FreeKey = -1;
         internal const int UnavailableKey = -2;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int Hash(int key)
-        {
-            // TODO: Add some form of bit mixing to avoid sequential keys (common case) having
-            // sequential hashes (which is bad for our distribution)
-            return key;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int Unhash(int key)
-        {
-            // TODO: Add some form of bit mixing to avoid sequential keys (common case) having
-            // sequential hashes (which is bad for our distribution)
-            return key;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsPowerOfTwo(int num) => num != 0 && (num & (num - 1)) == 0;
     }
 
     public sealed partial class ValueStore<T> : IEnumerable<ValueStore.SlotToken>
@@ -88,15 +69,5 @@ namespace Lecs.Memory
         IEnumerator<SlotToken> IEnumerable<SlotToken>.GetEnumerator() => new SlotEnumerator(this.keys);
 
         IEnumerator IEnumerable.GetEnumerator() => new SlotEnumerator(this.keys);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int ModuloCapacity(int value)
-        {
-            Debug.Assert(IsPowerOfTwo(this.capacity), "'capacity' is not a power-of-two");
-            Debug.Assert((this.capacity - 1) == this.capacityMinusOne, "'capacityMinusOne' is not equal to 'capacity - 1'");
-
-            // Because capacity is a power-of-two we can perform cheap modulo by just masking
-            return value & this.capacityMinusOne;
-        }
     }
 }
