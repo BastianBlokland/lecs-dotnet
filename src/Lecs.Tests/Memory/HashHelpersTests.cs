@@ -1,14 +1,49 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
 using Lecs.Memory;
-using System;
 
 namespace Lecs.Tests.Memory
 {
     public sealed class HashHelpersTests
     {
+        [Fact]
+        public static void Mix_SequentialNumbersCauseNonSequentialHashes()
+        {
+            /* For exhaustive test use 'int.MinValue' through 'int.MaxValue', but it makes the test
+            take a long time, so thats why we only test -10.000 through 10.000 right now */
+
+            const int MinTestVal = -10_000;
+            const int MaxTestVal = 10_000;
+
+            // Calculate the hashes for all the test integers
+            int prev = HashHelpers.Mix(MinTestVal);
+            for (int i = MinTestVal + 1; i < MaxTestVal; i++)
+            {
+                int mix = HashHelpers.Mix(i);
+                Assert.True(Distance(prev, mix) > 1);
+                prev = mix;
+            }
+
+            int Distance(int a, int b) => Math.Abs(a - b);
+        }
+
+        [Fact]
+        public static void Mix_NoIntegerCausesACollision()
+        {
+            /* For exhaustive test use 'int.MinValue' through 'int.MaxValue', but it makes the test
+            take a long time, so thats why we only test -10.000 through 10.000 right now */
+
+            var hashes = new HashSet<int>();
+            for (int i = -10_000; i < 10_000; i++)
+            {
+                int hash = HashHelpers.Mix(i);
+                Assert.True(hashes.Add(hash));
+            }
+        }
+
         [Theory]
         [MemberData(nameof(GetPowersOfTwoData))]
         public static void PowerOfTwo_ModuloPowerOfTwoWorksLikeNormalModulo(int pot)

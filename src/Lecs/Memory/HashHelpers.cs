@@ -5,20 +5,28 @@ namespace Lecs.Memory
 {
     internal static class HashHelpers
     {
+        /// <summary>
+        /// Mix the bits of a integer. Sequential input will result in non-sequential
+        /// output and there are no collisions (each input maps to a different output).
+        /// </summary>
+        /// <param name="num">Number to mix</param>
+        /// <returns>Mixed version of <paramref name="num"/></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int Mix(int key)
+        internal static int Mix(int num)
         {
-            // TODO: Add some form of bit mixing to avoid sequential keys (common case) having
-            // sequential hashes (which is bad for our distribution)
-            return key;
-        }
+            /*
+            Implementation of a fnv hash: https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
+            More info: http://isthe.com/chongo/tech/comp/fnv/
+            */
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int UnMix(int key)
-        {
-            // TODO: Add some form of bit mixing to avoid sequential keys (common case) having
-            // sequential hashes (which is bad for our distribution)
-            return key;
+            unchecked
+            {
+                // Constants used from the 32 bit table of the fnv wiki.
+                const int FnvPrime = 16777619;
+                const int FnvOffsetBasis = (int)0x811c9dc5;
+
+                return (FnvOffsetBasis ^ num) * FnvPrime;
+            }
         }
 
         /// <summary>
