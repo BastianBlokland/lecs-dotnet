@@ -49,8 +49,8 @@ namespace Lecs.Memory
 
                         // NOTE: We do not check for bounds here because we allocate our keys array
                         // 7 elements bigger then the capacity so its always safe to load 8 keys
-                        var elements = Avx2.LoadAlignedVector256(keysPointer + index);
                         Debug.Assert(this.keys.Length > (index + 7), "Loading outside of the bounds of the keys array");
+                        var elements = Avx2.LoadVector256(keysPointer + index);
 
                         var elementEquals = Avx2.CompareEqual(elements, targetReference);
                         switch (Avx2.MoveMask(elementEquals.AsByte()))
