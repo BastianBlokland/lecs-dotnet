@@ -8,24 +8,24 @@ using Lecs.Tests.Attributes;
 
 namespace Lecs.Tests.Memory
 {
-    public sealed class ValueStoreTests
+    public sealed class IntMapTests
     {
         [Fact]
         public static void Construct_WithOutOfBounds_InitialCapacity_Throws()
         {
             Assert.Throws<ArgumentOutOfRangeException>(
-                testCode: () => new ValueStore<float>(initialCapacity: -1));
+                testCode: () => new IntMap<float>(initialCapacity: -1));
             Assert.Throws<ArgumentOutOfRangeException>(
-                testCode: () => new ValueStore<float>(initialCapacity: int.MaxValue));
+                testCode: () => new IntMap<float>(initialCapacity: int.MaxValue));
         }
 
         [Fact]
         public static void Construct_WithOutOfBounds_MaxLoadFactor_Throws()
         {
             Assert.Throws<ArgumentOutOfRangeException>(
-                testCode: () => new ValueStore<float>(initialCapacity: 2, maxLoadFactor: 0f));
+                testCode: () => new IntMap<float>(initialCapacity: 2, maxLoadFactor: 0f));
             Assert.Throws<ArgumentOutOfRangeException>(
-                testCode: () => new ValueStore<float>(initialCapacity: 2, maxLoadFactor: 1f));
+                testCode: () => new IntMap<float>(initialCapacity: 2, maxLoadFactor: 1f));
         }
 
         [Fact]
@@ -33,14 +33,14 @@ namespace Lecs.Tests.Memory
         {
             const int AddCount = 25;
 
-            var valueStore = new ValueStore<float>(initialCapacity: 2);
+            var map = new IntMap<float>(initialCapacity: 2);
 
             for (int i = 0; i < AddCount; i++)
             {
-                Assert.Equal(i, valueStore.Count);
-                valueStore.Set(key: i, value: 1f);
+                Assert.Equal(i, map.Count);
+                map.Set(key: i, value: 1f);
             }
-            Assert.Equal(AddCount, valueStore.Count);
+            Assert.Equal(AddCount, map.Count);
         }
 
         [Fact]
@@ -48,49 +48,49 @@ namespace Lecs.Tests.Memory
         {
             const int TestKey = -234928;
 
-            var valueStore = new ValueStore<float>(initialCapacity: 2);
-            valueStore[TestKey] = 23423;
-            valueStore[TestKey] = 836;
-            valueStore[TestKey] = 93836;
-            valueStore[TestKey] = 283467;
+            var map = new IntMap<float>(initialCapacity: 2);
+            map[TestKey] = 23423;
+            map[TestKey] = 836;
+            map[TestKey] = 93836;
+            map[TestKey] = 283467;
 
-            Assert.Equal(1, valueStore.Count);
+            Assert.Equal(1, map.Count);
         }
 
         [Fact]
         public static void Remove_RemovedItemsNoLongerAppear()
         {
             // Force a low initial capacity so we test growing a few times
-            var valueStore = new ValueStore<double>(initialCapacity: 2);
+            var map = new IntMap<double>(initialCapacity: 2);
 
-            // Insert test data in the store
+            // Insert test data in the map
             var rand = new Random(Seed: 1);
             for (int i = 0; i < 10_000; i++)
             {
                 int key = rand.Next(maxValue: 1000);
                 double value = rand.NextDouble();
-                valueStore[key] = value;
+                map[key] = value;
             }
 
             // Take note of all keys above 500
-            var keysAbove500 = valueStore.
-                Select(slot => valueStore.GetKey(slot)).
+            var keysAbove500 = map.
+                Select(slot => map.GetKey(slot)).
                 Where(key => key > 500).
                 ToArray();
 
-            // Assert that the store contains more then just the keys above 500
-            Assert.NotEqual(keysAbove500.Length, valueStore.Count);
+            // Assert that the map contains more then just the keys above 500
+            Assert.NotEqual(keysAbove500.Length, map.Count);
 
             // Remove all keys below or equal to 500
-            valueStore.RemoveAll(valueStore.
-                Select(slot => valueStore.GetKey(slot)).
+            map.RemoveAll(map.
+                Select(slot => map.GetKey(slot)).
                 Where(key => key <= 500).
                 ToArray());
 
-            // Assert that the store now only contains the keys above 500
-            Assert.Equal(keysAbove500.Length, valueStore.Count);
+            // Assert that the map now only contains the keys above 500
+            Assert.Equal(keysAbove500.Length, map.Count);
 
-            var remainingKeys = valueStore.Select(slot => valueStore.GetKey(slot)).ToArray();
+            var remainingKeys = map.Select(slot => map.GetKey(slot)).ToArray();
             keysAbove500.SequenceEqual(remainingKeys);
         }
 
@@ -100,7 +100,7 @@ namespace Lecs.Tests.Memory
             /* This test tries to simulate 'normal' usage where keys are inserted and removed
             at random, behaviour is verified against a corefx dictionary */
 
-            var valueStore = new ValueStore<double>();
+            var map = new IntMap<double>();
             var referenceDict = new Dictionary<int, double>();
 
             var rand = new Random(Seed: 1);
@@ -112,7 +112,7 @@ namespace Lecs.Tests.Memory
                     int key = rand.Next(maxValue: 10_000);
                     double value = rand.NextDouble();
 
-                    valueStore[key] = value;
+                    map[key] = value;
                     referenceDict[key] = value;
                 }
 
@@ -120,19 +120,19 @@ namespace Lecs.Tests.Memory
                 for (int j = 0; j < rand.Next(maxValue: 1000); j++)
                 {
                     int key = rand.Next(maxValue: 10_000);
-                    valueStore.Remove(key);
+                    map.Remove(key);
                     referenceDict.Remove(key);
                 }
             }
 
             // Assert that both maps contain the same data
-            Assert.Equal(referenceDict.Count, valueStore.Count);
+            Assert.Equal(referenceDict.Count, map.Count);
             foreach (var kvp in referenceDict)
             {
-                ValueStore.SlotToken slot;
-                Assert.True(valueStore.Find(kvp.Key, out slot));
-                Assert.Equal(kvp.Key, valueStore.GetKey(slot));
-                Assert.Equal(kvp.Value, valueStore.GetValue(slot));
+                IntMap.SlotToken slot;
+                Assert.True(map.Find(kvp.Key, out slot));
+                Assert.Equal(kvp.Key, map.GetKey(slot));
+                Assert.Equal(kvp.Value, map.GetValue(slot));
             }
         }
 
@@ -140,7 +140,7 @@ namespace Lecs.Tests.Memory
         public static void Get_ItemCanBeRetrieved()
         {
             // Force a low initial capacity so we test growing a few times
-            var valueStore = new ValueStore<double>(initialCapacity: 2);
+            var map = new IntMap<double>(initialCapacity: 2);
             var referenceDict = new Dictionary<int, double>();
 
             // Insert test data in both maps
@@ -151,21 +151,21 @@ namespace Lecs.Tests.Memory
                 int key = rand.Next();
                 double value = rand.NextDouble();
 
-                valueStore[key] = value;
+                map[key] = value;
                 referenceDict[key] = value;
             }
 
             // Assert that both maps contain the same amount of entries
-            Assert.Equal(referenceDict.Count, valueStore.Count);
+            Assert.Equal(referenceDict.Count, map.Count);
 
-            // Assert that all keys from the reference dict can be found in our store
+            // Assert that all keys from the reference dict can be found in our map
             foreach (var kvp in referenceDict)
-                Assert.Equal(kvp.Value, valueStore.GetValue(kvp.Key));
+                Assert.Equal(kvp.Value, map.GetValue(kvp.Key));
 
-            // Get all the keys that are returned from the valuestore enumerator
-            var keys = valueStore.Select(slot => valueStore.GetKey(slot)).ToArray();
+            // Get all the keys that are returned from the map enumerator
+            var keys = map.Select(slot => map.GetKey(slot)).ToArray();
 
-            // Assert that the value-store enumerator lists all entries
+            // Assert that the map enumerator lists all entries
             Assert.Equal(referenceDict.Count, keys.Length);
             foreach (var referenceKey in referenceDict.Keys)
                 Assert.Contains(referenceKey, keys);
@@ -176,34 +176,34 @@ namespace Lecs.Tests.Memory
         {
             const int TestKey = -234928;
 
-            var valueStore = new ValueStore<int>(initialCapacity: 2);
+            var map = new IntMap<int>(initialCapacity: 2);
 
-            var slot = valueStore.Set(TestKey, value: 10);
-            ref var valRef = ref valueStore.GetValue(slot);
+            var slot = map.Set(TestKey, value: 10);
+            ref var valRef = ref map.GetValue(slot);
 
             Assert.Equal(10, valRef);
 
             valRef = 20;
 
-            Assert.Equal(20, valueStore.GetValue(TestKey));
+            Assert.Equal(20, map.GetValue(TestKey));
         }
 
         [Fact]
         public static void Clear_ResultsInZeroCount()
         {
-            var valueStore = new ValueStore<float>
+            var map = new IntMap<float>
             {
                 { 10, 20f },
                 { 20, 30f }
             };
 
-            Assert.Equal(2, valueStore.Count);
-            Assert.Equal(2, valueStore.ToArray().Length);
+            Assert.Equal(2, map.Count);
+            Assert.Equal(2, map.ToArray().Length);
 
-            valueStore.Clear();
+            map.Clear();
 
-            Assert.Equal(0, valueStore.Count);
-            Assert.Empty(valueStore.ToArray());
+            Assert.Equal(0, map.Count);
+            Assert.Empty(map.ToArray());
         }
     }
 }

@@ -8,11 +8,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 
-using static Lecs.Memory.ValueStore;
+using static Lecs.Memory.IntMap;
 
 namespace Lecs.Memory
 {
-    public static partial class ValueStore
+    public static partial class IntMap
     {
         /* Use this non-generic class for putting static data that does not need to be 'instantiated'
         per generic type */
@@ -21,7 +21,7 @@ namespace Lecs.Memory
         internal const int UnavailableKey = -2;
     }
 
-    public sealed partial class ValueStore<T> : IEnumerable<ValueStore.SlotToken>
+    public sealed partial class IntMap<T> : IEnumerable<IntMap.SlotToken>
         where T : unmanaged
     {
         private readonly float maxLoadFactor;
@@ -33,7 +33,7 @@ namespace Lecs.Memory
         private int maxCount;
         private int count;
 
-        public ValueStore(int initialCapacity = 256, float maxLoadFactor = .75f)
+        public IntMap(int initialCapacity = 256, float maxLoadFactor = .75f)
         {
             if (initialCapacity <= 1 || initialCapacity > HashHelpers.BiggestPowerOfTwo)
             {
@@ -65,7 +65,7 @@ namespace Lecs.Memory
             bool exists = this.Find(key, out SlotToken slot);
             if (exists)
             {
-                // If it already exists in the store we can just update it
+                // If it already exists in the map we can just update it
                 GetValueRef(slot, this.values) = value;
             }
             else // !exists
@@ -77,14 +77,14 @@ namespace Lecs.Memory
                 GetKeyRef(slot, this.keys) = key;
                 GetValueRef(slot, this.values) = value;
 
-                // Increment the count and grow the store if it now contains too many elements
+                // Increment the count and grow the map if it now contains too many elements
                 this.count++;
                 if (this.count > this.maxCount)
                 {
                     var oldKeys = this.keys;
                     var oldValues = this.values;
 
-                    // Grow the store
+                    // Grow the map
                     this.Initialize(capacity: HashHelpers.NextPowerOfTwo(capacity));
 
                     // Re-insert the old keys and values
@@ -108,7 +108,7 @@ namespace Lecs.Memory
             if (GetKeyRef(slot, this.keys) == FreeKey)
                 throw new ArgumentException("Provided slot does not contain a value");
 
-            // Decrement count of items in store
+            // Decrement count of items in map
             this.count--;
             Debug.Assert(this.count >= 0, "Count should never go negative");
 
@@ -119,7 +119,7 @@ namespace Lecs.Memory
             {
                 ref int nextKey = ref GetKeyRef(nextSlot, this.keys);
 
-                Debug.Assert(nextKey != GetKeyRef(slot, this.keys), "Key lives in the store twice");
+                Debug.Assert(nextKey != GetKeyRef(slot, this.keys), "Key lives in the map twice");
 
                 // If its the end of a chain then we are done shifting
                 if (nextKey == FreeKey)
@@ -138,7 +138,7 @@ namespace Lecs.Memory
 
                 // Update 'nextSlot' to point to one further
                 nextSlot = this.GetNextSlot(nextSlot);
-                Debug.Assert(nextSlot != slot, "We looped the entire store without finding a free-key");
+                Debug.Assert(nextSlot != slot, "We looped the entire map without finding a free-key");
             }
 
             // Mark the last slot in the chain as now being free
@@ -188,7 +188,7 @@ namespace Lecs.Memory
 
         public ref T GetValue(SlotToken slot) =>
             // NOTE: Its mostly safe to hand out a ref to the value as its okay the caller to change
-            // this without us knowing. The only exception to this is when we resize the store.
+            // this without us knowing. The only exception to this is when we resize the map.
             ref GetValueRef(slot, this.values);
 
         public SlotEnumerator GetEnumerator() => new SlotEnumerator(this.keys);
@@ -224,7 +224,7 @@ namespace Lecs.Memory
         private static int GetMaxCount(int capacity, float maxLoadFactor)
         {
             /*
-            Calculate how far we are allowed to fill up the store based on the configured load-factor.
+            Calculate how far we are allowed to fill up the map based on the configured load-factor.
             Always return at least 1.
             */
 

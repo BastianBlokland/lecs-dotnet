@@ -5,18 +5,18 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
-using static Lecs.Memory.ValueStore;
+using static Lecs.Memory.IntMap;
 
 namespace Lecs.Memory
 {
-    public sealed partial class ValueStore<T>
+    public sealed partial class IntMap<T>
         where T : unmanaged
     {
         /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal unsafe bool FindAvx2(int key, out SlotToken slot)
         {
-            /* NOTE: This assumes that the store is never completely full, if it is then this will
+            /* NOTE: This assumes that the map is never completely full, if it is then this will
             loop infinitely */
 
             slot = this.GetDesiredSlot(key);

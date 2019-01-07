@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace Lecs.Memory
 {
-    public static partial class ValueStore
+    public static partial class IntMap
     {
         /* Use this non-generic class for putting static data that does not need to be 'instantiated'
         per generic type */

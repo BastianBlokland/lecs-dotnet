@@ -7,12 +7,12 @@ using System.Runtime.CompilerServices;
 
 namespace Lecs.Memory
 {
-    public static partial class ValueStore
+    public static partial class IntMap
     {
         /* Use this non-generic class for putting static data that does not need to be 'instantiated'
         per generic type */
 
-        public struct SlotEnumerator : IEnumerator<ValueStore.SlotToken>, IEnumerator
+        public struct SlotEnumerator : IEnumerator<IntMap.SlotToken>, IEnumerator
         {
             private readonly int[] keys;
             private int currentIndex;
@@ -31,7 +31,7 @@ namespace Lecs.Memory
                     NOTE: This is not super safe because this can hand-out tokens pointing to -1 when
                     calling 'Current' without calling 'MoveNext' (or when 'MoveNext' returns false).
                     But adding checks here also feels wastefull because it will make the common
-                    'foreach (var slot in valueStore)' case much slower.
+                    'foreach (var slot in map)' case much slower.
                     So for the moment i'll leave it as a quirk to add to documentation.
                     */
 
