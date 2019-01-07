@@ -155,6 +155,9 @@ namespace Lecs.Memory
         /// <param name="slot">Slot to remove from</param>
         public void Remove(SlotToken slot)
         {
+            /* When removing we need to make sure each key is as 'close' to their desired slot as
+            possible, we do this by shiting them if a better slot opened up for them. */
+
             // Check if the slot not already free, this is to protect 'count' going too low on misuse.
             if (GetKeyRef(slot, this.keys) == FreeKey)
                 throw new ArgumentException("Provided slot does not contain a value");
@@ -247,6 +250,10 @@ namespace Lecs.Memory
         /// <returns>'True' is the key was found, otherwise 'False' </returns>
         public bool Find(int key, out SlotToken slot)
         {
+            /* We use linear probing for searching so we get an initial slot from hashing the key
+            and then keeping advancing one-by-one until we find our key or we find a empty slot.
+            The first empty slot is returned so we can use this slot for insertions. */
+
             if (Avx2.IsSupported)
                 return this.FindAvx2(key, out slot);
             else
