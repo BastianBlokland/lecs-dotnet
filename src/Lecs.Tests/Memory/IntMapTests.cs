@@ -100,8 +100,8 @@ namespace Lecs.Tests.Memory
             /* This test tries to simulate 'normal' usage where keys are inserted and removed
             at random, behaviour is verified against a corefx dictionary */
 
-            var map = new IntMap<double>();
-            var referenceDict = new Dictionary<int, double>();
+            var map = new IntMap<string>();
+            var referenceDict = new Dictionary<int, string>();
 
             var rand = new Random(Seed: 1);
             for (int i = 0; i < 1000; i++)
@@ -110,7 +110,7 @@ namespace Lecs.Tests.Memory
                 for (int j = 0; j < rand.Next(maxValue: 1000); j++)
                 {
                     int key = rand.Next(maxValue: 10_000);
-                    double value = rand.NextDouble();
+                    string value = rand.NextDouble().ToString();
 
                     map[key] = value;
                     referenceDict[key] = value;
@@ -134,6 +134,13 @@ namespace Lecs.Tests.Memory
                 Assert.Equal(kvp.Key, map.GetKey(slot));
                 Assert.Equal(kvp.Value, map.GetValue(slot));
             }
+        }
+
+        [Fact]
+        public static void Remove_TryingToRemoveNonEmptySlotThrows()
+        {
+            var map = new IntMap<string>();
+            Assert.Throws<ArgumentException>(() => map.Remove(default(IntMap.SlotToken)));
         }
 
         [Fact]
@@ -189,12 +196,19 @@ namespace Lecs.Tests.Memory
         }
 
         [Fact]
+        public static void Get_OnItemThatDoesNotExistsThrows()
+        {
+            var map = new IntMap<double>();
+            Assert.Throws<KeyNotFoundException>(() => map.GetValue(0));
+        }
+
+        [Fact]
         public static void Clear_ResultsInZeroCount()
         {
-            var map = new IntMap<float>
+            var map = new IntMap<string>
             {
-                { 10, 20f },
-                { 20, 30f }
+                { 10, "Test1" },
+                { 20, "Test2" }
             };
 
             Assert.Equal(2, map.Count);
@@ -204,6 +218,37 @@ namespace Lecs.Tests.Memory
 
             Assert.Equal(0, map.Count);
             Assert.Empty(map.ToArray());
+        }
+
+        [Fact]
+        public static void SlotToken_Equality_WorksAsExpected()
+        {
+            // Equal
+            Assert.Equal(new IntMap.SlotToken(123), new IntMap.SlotToken(123));
+            Assert.True(new IntMap.SlotToken(123) == new IntMap.SlotToken(123));
+            Assert.False(new IntMap.SlotToken(123) != new IntMap.SlotToken(123));
+
+            // Unequal
+            Assert.NotEqual(new IntMap.SlotToken(123), new IntMap.SlotToken(0));
+            Assert.False(new IntMap.SlotToken(123) == new IntMap.SlotToken(0));
+            Assert.True(new IntMap.SlotToken(123) != new IntMap.SlotToken(0));
+
+            // Random object
+            Assert.NotEqual(default(IntMap.SlotToken), new object());
+        }
+
+        [Fact]
+        public static void SlotToken_GetHashCode_WorksAsExpected()
+        {
+            Assert.Equal(0, default(IntMap.SlotToken).GetHashCode());
+            Assert.Equal(123, new IntMap.SlotToken(123).GetHashCode());
+        }
+
+        [Fact]
+        public static void SlotToken_ToString_WorksAsExpected()
+        {
+            Assert.Equal("0", default(IntMap.SlotToken).ToString());
+            Assert.Equal("123", new IntMap.SlotToken(123).ToString());
         }
     }
 }

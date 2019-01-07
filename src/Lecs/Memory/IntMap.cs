@@ -151,6 +151,9 @@ namespace Lecs.Memory
 
             bool IsBetterSlot(int key, SlotToken currentSlot, SlotToken potentialSlot)
             {
+                ref int currentIndex = ref Unsafe.As<SlotToken, int>(ref currentSlot);
+                ref int potentialIndex = ref Unsafe.As<SlotToken, int>(ref potentialSlot);
+
                 /*
                 D = Desired, C = Current
                 Wrapped case: Better if P < C || P > D
@@ -160,14 +163,15 @@ namespace Lecs.Memory
                 */
 
                 SlotToken desiredSlot = this.GetDesiredSlot(key);
-                if (potentialSlot == desiredSlot)
+                ref int desiredIndex = ref Unsafe.As<SlotToken, int>(ref desiredSlot);
+                if (potentialIndex == desiredIndex)
                     return true;
 
-                bool wrapped = currentSlot < desiredSlot;
+                bool wrapped = currentIndex < desiredIndex;
                 if (wrapped)
-                    return potentialSlot < currentSlot || potentialSlot > desiredSlot;
+                    return potentialIndex < currentIndex || potentialIndex > desiredIndex;
                 else // !wrapped
-                    return potentialSlot > desiredSlot && potentialSlot < currentSlot;
+                    return potentialIndex > desiredIndex && potentialIndex < currentIndex;
             }
         }
 

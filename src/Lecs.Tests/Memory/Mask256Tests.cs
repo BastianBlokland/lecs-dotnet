@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 using Lecs.Memory;
@@ -288,6 +289,15 @@ namespace Lecs.Tests.Memory
                 "0000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000001";
             Assert.Equal(expectedString, mask.ToString());
         }
+
+        [Fact]
+        public static void Mask256_IsUnmanagedType() =>
+            Assert.False(RuntimeHelpers.IsReferenceOrContainsReferences<Mask256>());
+
+        [Fact]
+        public static void ReadOnlyMask256_IsUnmanagedType() =>
+            Assert.False(RuntimeHelpers.IsReferenceOrContainsReferences<ReadOnlyMask256>());
+
 
         public static IEnumerable<object[]> GetSingleMasksData()
         {

@@ -11,6 +11,9 @@ namespace Lecs.Memory
         /* Use this non-generic class for putting static data that does not need to be 'instantiated'
         per generic type */
 
+        /// <summary>
+        /// Token used to identify a slot in the map
+        /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = sizeof(int))]
         public readonly struct SlotToken : IEquatable<SlotToken>
         {
@@ -24,17 +27,21 @@ namespace Lecs.Memory
 
             internal SlotToken(int index) => this.index = index;
 
+            /// <summary>
+            /// Are two given tokens pointing to the same slot
+            /// </summary>
+            /// <param name="a">Slot a</param>
+            /// <param name="b">Slot b</param>
+            /// <returns>'True' if they point to the same slot, otherwise 'False'</returns>
             public static bool operator ==(SlotToken a, SlotToken b) => a.Equals(b);
 
+            /// <summary>
+            /// Are two given tokens pointing to different slots
+            /// </summary>
+            /// <param name="a">Slot a</param>
+            /// <param name="b">Slot b</param>
+            /// <returns>'True' if they point to different slots, otherwise 'False'</returns>
             public static bool operator !=(SlotToken a, SlotToken b) => !a.Equals(b);
-
-            public static bool operator >(SlotToken a, SlotToken b) => a.index > b.index;
-
-            public static bool operator <(SlotToken a, SlotToken b) => a.index < b.index;
-
-            public static bool operator >=(SlotToken a, SlotToken b) => a.index >= b.index;
-
-            public static bool operator <=(SlotToken a, SlotToken b) => a.index <= b.index;
 
             public override int GetHashCode() => this.index;
 
