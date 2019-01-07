@@ -13,6 +13,6 @@ build: clean
 test: clean
 	./ci/test.sh
 
-filter=Lecs.Benchmark.*
+filter=''
 benchmark: clean
 	FILTER=$(filter) ./ci/benchmark.sh
