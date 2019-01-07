@@ -22,8 +22,8 @@ namespace Lecs.Memory
     }
 
     public sealed partial class IntMap<T> : IEnumerable<IntMap.SlotToken>
-        where T : unmanaged
     {
+        private readonly bool isManaged;
         private readonly float maxLoadFactor;
 
         private int[] keys; // Allocated 7 elements bigger for safe 256 bit jumps without range checking
@@ -48,6 +48,7 @@ namespace Lecs.Memory
                     "Must be between '0' and '1'");
             }
 
+            this.isManaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
             this.maxLoadFactor = maxLoadFactor;
             this.Initialize(capacity: HashHelpers.RoundUpToPowerOfTwo(initialCapacity));
         }
@@ -144,6 +145,9 @@ namespace Lecs.Memory
             // Mark the last slot in the chain as now being free
             Debug.Assert(GetKeyRef(curSlot, this.keys) != FreeKey, "Slot was already free");
             GetKeyRef(curSlot, this.keys) = FreeKey;
+            // If 'T' is a managed type we need to clear it so the garbage-collector can clean it up.
+            if (isManaged)
+                GetValueRef(curSlot, this.values) = default(T);
 
             bool IsBetterSlot(int key, SlotToken currentSlot, SlotToken potentialSlot)
             {
@@ -171,6 +175,10 @@ namespace Lecs.Memory
         {
             Array.Fill(this.keys, value: FreeKey, startIndex: 0, count: capacity);
             this.count = 0;
+
+            // If 'T' is a managed type we need to clear it so the garbage-collector can clean it up.
+            if (isManaged)
+                Array.Clear(this.values, index: 0, length: this.values.Length);
         }
 
         public bool Find(int key, out SlotToken slot)

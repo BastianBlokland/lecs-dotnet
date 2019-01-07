@@ -15,7 +15,6 @@ namespace Lecs.Memory
         /// <param name="keys">Collection to keys to remove</param>
         /// <typeparam name="T">Type of the data</typeparam>
         public static void RemoveAll<T>(this IntMap<T> map, Span<int> keys)
-            where T : unmanaged
         {
             /* Note: At the moment this does a simple loop so this method does not add much, but
             its a path we can actually optimize in the future. For example we could do the bit mixing
@@ -32,7 +31,6 @@ namespace Lecs.Memory
         /// <param name="key">Key to remove</param>
         /// <typeparam name="T">Type of the data</typeparam>
         public static void Remove<T>(this IntMap<T> map, int key)
-            where T : unmanaged
         {
             // Find the slot for this item
             if (!map.Find(key, out SlotToken slot)) // If not found: No need to remove it
@@ -54,8 +52,7 @@ namespace Lecs.Memory
         /// <param name="value">Value to set</param>
         /// <typeparam name="T">Type of the value</typeparam>
         /// <returns>Slot that the item was inserted at</returns>
-        public static SlotToken Add<T>(this IntMap<T> map, int key, in T value)
-            where T : unmanaged => map.Set(key, value);
+        public static SlotToken Add<T>(this IntMap<T> map, int key, in T value) => map.Set(key, value);
 
         /// <summary>
         /// Convenience extension for retrieving a value for given key.
@@ -69,7 +66,6 @@ namespace Lecs.Memory
         /// NOTE: Its perfectly legal to use this syntax to change the value
         /// </returns>
         public static ref T GetValue<T>(this IntMap<T> map, int key)
-            where T : unmanaged
         {
             if (!map.Find(key, out SlotToken slot))
                 throw new KeyNotFoundException($"Key: '{key}' is not found in this map");

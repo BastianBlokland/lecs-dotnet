@@ -10,7 +10,6 @@ using static Lecs.Memory.IntMap;
 namespace Lecs.Memory
 {
     public sealed partial class IntMap<T>
-        where T : unmanaged
     {
         /* NOTE: Query for support before calling this! */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
