@@ -7,11 +7,30 @@ using System.Runtime.CompilerServices;
 
 namespace Lecs.Memory
 {
+    /// <summary>
+    /// Non-generic helpers for the <See cRef="IntMap{T}"/>
+    /// </summary>
     public static partial class IntMap
     {
         /* Use this non-generic class for putting static data that does not need to be 'instantiated'
         per generic type */
 
+        /// <summary>
+        /// Enumerator for enumerating all used slots in the map.
+        /// </summary>
+        /// <remarks>
+        /// There are a few gotchas with this enumerator:
+        ///
+        /// - <See cRef="Current"/> only returns a valid token after a call to <See cRef="MoveNext()"/>
+        /// returned true, trying to use a token that was acquired in other cases leads to undefined
+        /// behaviour and will probably crash. This is because for performance reasons there are very
+        /// little checks on the usage of <See cRef="SlotToken"/>.
+        ///
+        /// - Tokens returned from <See cRef="Current"/> should not be cached because the map might be
+        /// reordered when adding / removing items.
+        ///
+        /// - Changing the map while enumerating over it is considered undefined behaviour.
+        /// </remarks>
         public struct SlotEnumerator : IEnumerator<IntMap.SlotToken>, IEnumerator
         {
             private readonly int[] keys;
@@ -23,6 +42,23 @@ namespace Lecs.Memory
                 this.currentIndex = -1;
             }
 
+            /// <summary>
+            /// Gets a token pointing to the current slot.
+            /// </summary>
+            /// <remarks>
+            /// Few gotchas:
+            /// - Only returns a valid <See cRef="SlotToken"/> when a call to  <See cRef="MoveNext()"/>
+            /// returned true, trying to use a token that was acquired in other scenarios is considered
+            /// undefined behaviour and will probably crash.
+            ///
+            /// - Tokens returned from this should NOT be cached because the map might be reordered
+            /// when adding or removing items.
+            /// </remarks>
+            /// <value>
+            /// Token pointing to the current slot, this token can be used in:
+            /// - <See cRef="IntMap{T}.GetKey(SlotToken slot)"/>
+            /// - <See cRef="IntMap{T}.GetValue(SlotToken slot)"/>
+            /// </value>
             public SlotToken Current
             {
                 get
@@ -40,9 +76,17 @@ namespace Lecs.Memory
                 }
             }
 
+            /// <summary>
+            /// Gets a boxed version of the token. Avoid calling.
+            /// </summary>
+            /// <returns>Boxed token</returns>
             [ExcludeFromCodeCoverage] // Non-boxing version already covered
             object IEnumerator.Current => this.Current;
 
+            /// <summary>
+            /// Move the enumerator to the next used slot.
+            /// </summary>
+            /// <returns>'True' when we found a next used slot, otherwise 'False'</returns>
             public bool MoveNext()
             {
                 /*
@@ -79,8 +123,14 @@ namespace Lecs.Memory
                 }
             }
 
-            void IEnumerator.Reset() => this.currentIndex = -1;
+            /// <summary>
+            /// Reset the enumerator
+            /// </summary>
+            public void Reset() => this.currentIndex = -1;
 
+            /// <summary>
+            /// Avoid calling, no need on this enumerator
+            /// </summary>
             void IDisposable.Dispose()
             {
             }

@@ -1,4 +1,5 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix (Collection)
+#pragma warning disable SA1619 // The documentation for type parameter 'T' is missing
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,9 @@ using static Lecs.Memory.IntMap;
 
 namespace Lecs.Memory
 {
+    /// <summary>
+    /// Partial containing Avx2 intrinsics logic.
+    /// </summary>
     public sealed partial class IntMap<T>
     {
         /* NOTE: Query for support before calling this! */
@@ -48,7 +52,6 @@ namespace Lecs.Memory
 
                         // NOTE: We do not check for bounds here because we allocate our keys array
                         // 7 elements bigger then the capacity so its always safe to load 8 keys
-
                         Debug.Assert(this.keys.Length > (index + 7), "Loading outside of the bounds of the keys array");
                         var elements = Avx2.LoadVector256(keysPointer + index);
 
@@ -112,6 +115,7 @@ namespace Lecs.Memory
                                             index += i;
                                             return false;
                                         }
+
                                         mask <<= 4;
                                     }
 

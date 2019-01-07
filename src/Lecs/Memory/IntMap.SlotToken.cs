@@ -6,6 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace Lecs.Memory
 {
+    /// <summary>
+    /// Non-generic helpers for the <See cRef="IntMap{T}"/>
+    /// </summary>
     public static partial class IntMap
     {
         /* Use this non-generic class for putting static data that does not need to be 'instantiated'
@@ -43,10 +46,26 @@ namespace Lecs.Memory
             /// <returns>'True' if they point to different slots, otherwise 'False'</returns>
             public static bool operator !=(SlotToken a, SlotToken b) => !a.Equals(b);
 
+            /// <summary>
+            /// Get a hash to represent this token
+            /// </summary>
+            /// <returns>Hash representing this token</returns>
             public override int GetHashCode() => this.index;
 
+            /// <summary>
+            /// Get a string representation of this token
+            /// </summary>
+            /// <returns>String representing this token</returns>
             public override string ToString() => this.index.ToString(CultureInfo.InvariantCulture);
 
+            /// <summary>
+            /// Is this slot equal to the given object
+            /// </summary>
+            /// <remarks>
+            /// Avoid using this at all costs as it requires boxing the target.
+            /// </remarks>
+            /// <param name="obj">Object to comapre to</param>
+            /// <returns>'True' if they point to the same slot, otherwise 'False'</returns>
             public override bool Equals(object obj)
             {
                 switch (obj)
@@ -58,6 +77,11 @@ namespace Lecs.Memory
                 }
             }
 
+            /// <summary>
+            /// Is this token pointing to same slot as the given token
+            /// </summary>
+            /// <param name="other">Token to comapre to</param>
+            /// <returns>'True' if they point to the same slot, otherwise 'False'</returns>
             public bool Equals(SlotToken other) => other.index.Equals(this.index);
         }
     }

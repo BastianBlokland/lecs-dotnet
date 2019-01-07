@@ -298,7 +298,6 @@ namespace Lecs.Tests.Memory
         public static void ReadOnlyMask256_IsUnmanagedType() =>
             Assert.False(RuntimeHelpers.IsReferenceOrContainsReferences<ReadOnlyMask256>());
 
-
         public static IEnumerable<object[]> GetSingleMasksData()
         {
             foreach (var tuple in GetSingleMasks())

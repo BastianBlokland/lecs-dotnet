@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+
 using Xunit;
 
 using Lecs.Memory;
@@ -40,6 +42,7 @@ namespace Lecs.Tests.Memory
                 Assert.Equal(i, map.Count);
                 map.Set(key: i, value: 1f);
             }
+
             Assert.Equal(AddCount, map.Count);
         }
 
@@ -110,7 +113,7 @@ namespace Lecs.Tests.Memory
                 for (int j = 0; j < rand.Next(maxValue: 1000); j++)
                 {
                     int key = rand.Next(maxValue: 10_000);
-                    string value = rand.NextDouble().ToString();
+                    string value = rand.NextDouble().ToString(CultureInfo.InvariantCulture);
 
                     map[key] = value;
                     referenceDict[key] = value;

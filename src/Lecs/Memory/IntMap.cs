@@ -12,6 +12,9 @@ using static Lecs.Memory.IntMap;
 
 namespace Lecs.Memory
 {
+    /// <summary>
+    /// Non-generic helpers for the <See cRef="IntMap{T}"/>
+    /// </summary>
     public static partial class IntMap
     {
         /* Use this non-generic class for putting static data that does not need to be 'instantiated'
@@ -21,6 +24,22 @@ namespace Lecs.Memory
         internal const int UnavailableKey = -2;
     }
 
+    /// <summary>
+    /// Associative array that uses a integer as a key. Designed for fast quering and enumerating.
+    /// Main usage is that you acquire a <See cRef="SlotToken"/> by either enumerating the slots,
+    /// finding a slot for a key or setting a item, with that token you can then get or set the value.
+    ///
+    /// Implemented as a open-indexing hashmap with linear probing and simd instructions for finding keys.
+    /// </summary>
+    /// <remarks>
+    /// This map is designed more for speed then for safety, for example usage of <See cRef="SlotToken"/>
+    /// is checked very little. So its up to the user to avoid using old tokens, tokens from another
+    /// map or self-constructed tokens, otherwise undefined behaviour will follow.
+    /// </remarks>
+    /// <typeparam name="T">
+    /// Type of the data in the map. There is a fast-path for unmanaged types (structs without any
+    /// managed references on them) that avoids clearing data.
+    /// </typeparam>
     public sealed partial class IntMap<T> : IEnumerable<IntMap.SlotToken>
     {
         private readonly bool isManaged;
@@ -33,6 +52,18 @@ namespace Lecs.Memory
         private int maxCount;
         private int count;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IntMap{T}"/> class
+        /// </summary>
+        /// <param name="initialCapacity">
+        /// Initial capacity for the map, will be rounded up to the nearest power-of-two and then
+        /// doubled each time it runs out of space.
+        /// </param>
+        /// <param name="maxLoadFactor">
+        /// How far we will fill up the map before growing, value has to be between 0 and 1.
+        /// Low value will result in less collisions but also less data locality and more memory usage.
+        /// High values will result in more collisions but higher data locality and less memory usage.
+        /// </param>
         public IntMap(int initialCapacity = 256, float maxLoadFactor = .75f)
         {
             if (initialCapacity <= 1 || initialCapacity > HashHelpers.BiggestPowerOfTwo)
@@ -41,6 +72,7 @@ namespace Lecs.Memory
                     nameof(initialCapacity),
                     $"Must between '1' and '{HashHelpers.BiggestPowerOfTwo + 1}'");
             }
+
             if (maxLoadFactor <= 0f || maxLoadFactor >= 1f)
             {
                 throw new ArgumentOutOfRangeException(
@@ -53,13 +85,27 @@ namespace Lecs.Memory
             this.Initialize(capacity: HashHelpers.RoundUpToPowerOfTwo(initialCapacity));
         }
 
+        /// <summary>
+        /// Gets how many slots are currently filled in the map.
+        /// </summary>
         public int Count => this.count;
 
+        /// <summary>
+        /// Set a value for a key.
+        /// </summary>
+        /// <param name="key">Key to set the value for</param>
         public T this[int key]
         {
-            set => Set(key, value);
+            get => this.GetValue(key);
+            set => this.Set(key, in value);
         }
 
+        /// <summary>
+        /// Set a value for a key.
+        /// </summary>
+        /// <param name="key">Key to set the value for</param>
+        /// <param name="value">Value to set</param>
+        /// <returns>Returns the slot where this value was set into</returns>
         public SlotToken Set(int key, in T value)
         {
             // Find a slot for this item
@@ -69,7 +115,7 @@ namespace Lecs.Memory
                 // If it already exists in the map we can just update it
                 GetValueRef(slot, this.values) = value;
             }
-            else // !exists
+            else
             {
                 Debug.Assert(GetKeyRef(slot, this.keys) == FreeKey, "Slot to insert to has to be empty");
                 Debug.Assert(Array.IndexOf(this.keys, key) == -1, "Incorrectly determined that key did not exist yet");
@@ -86,7 +132,7 @@ namespace Lecs.Memory
                     var oldValues = this.values;
 
                     // Grow the map
-                    this.Initialize(capacity: HashHelpers.NextPowerOfTwo(capacity));
+                    this.Initialize(capacity: HashHelpers.NextPowerOfTwo(this.capacity));
 
                     // Re-insert the old keys and values
                     var enumerator = new SlotEnumerator(oldKeys);
@@ -103,6 +149,10 @@ namespace Lecs.Memory
             return slot;
         }
 
+        /// <summary>
+        /// Remove a key and value
+        /// </summary>
+        /// <param name="slot">Slot to remove from</param>
         public void Remove(SlotToken slot)
         {
             // Check if the slot not already free, this is to protect 'count' going too low on misuse.
@@ -145,8 +195,9 @@ namespace Lecs.Memory
             // Mark the last slot in the chain as now being free
             Debug.Assert(GetKeyRef(curSlot, this.keys) != FreeKey, "Slot was already free");
             GetKeyRef(curSlot, this.keys) = FreeKey;
+
             // If 'T' is a managed type we need to clear it so the garbage-collector can clean it up.
-            if (isManaged)
+            if (this.isManaged)
                 GetValueRef(curSlot, this.values) = default(T);
 
             bool IsBetterSlot(int key, SlotToken currentSlot, SlotToken potentialSlot)
@@ -175,16 +226,25 @@ namespace Lecs.Memory
             }
         }
 
+        /// <summary>
+        /// Remove all entries
+        /// </summary>
         public void Clear()
         {
-            Array.Fill(this.keys, value: FreeKey, startIndex: 0, count: capacity);
+            Array.Fill(this.keys, value: FreeKey, startIndex: 0, count: this.capacity);
             this.count = 0;
 
             // If 'T' is a managed type we need to clear it so the garbage-collector can clean it up.
-            if (isManaged)
+            if (this.isManaged)
                 Array.Clear(this.values, index: 0, length: this.values.Length);
         }
 
+        /// <summary>
+        /// Find the slot where the given key is in the map.
+        /// </summary>
+        /// <param name="key">Key to look for</param>
+        /// <param name="slot">Slot where the given key is found</param>
+        /// <returns>'True' is the key was found, otherwise 'False' </returns>
         public bool Find(int key, out SlotToken slot)
         {
             if (Avx2.IsSupported)
@@ -193,17 +253,47 @@ namespace Lecs.Memory
                 throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Get the key for the given slot.
+        /// </summary>
+        /// <param name="slot">Slot to get the key for</param>
+        /// <returns>Key</returns>
         public int GetKey(SlotToken slot) =>
-            // NOTE: We CANNOT hand out a ref to the key as we need to be in tight control of the
-            // sequence of keys
+            /* NOTE: We CANNOT hand out a ref to the key as we need to be in tight control of the
+            sequence of keys */
             GetKeyRef(slot, this.keys);
 
+        /// <summary>
+        /// Get the value for the given slot.
+        /// </summary>
+        /// <remarks>
+        /// Returned as a ref so it can also be used to change the value.
+        /// </remarks>
+        /// <param name="slot">Slot to get the value for</param>
+        /// <returns>Ref to the value</returns>
         public ref T GetValue(SlotToken slot) =>
-            // NOTE: Its mostly safe to hand out a ref to the value as its okay the caller to change
-            // this without us knowing. The only exception to this is when we resize the map.
+            /* NOTE: Its mostly safe to hand out a ref to the value as its okay the caller to change
+            this without us knowing. The only exception to this is when we resize the map. */
             ref GetValueRef(slot, this.values);
 
+        /// <summary>
+        /// Get a enumerator for enumerating all used slots.
+        /// </summary>
+        /// <returns>Enumerator to enumerate the used slots</returns>
         public SlotEnumerator GetEnumerator() => new SlotEnumerator(this.keys);
+
+        /// <summary>
+        /// Get a boxed enumerator. Avoid used this at all costs.
+        /// </summary>
+        /// <returns>Boxed enumerator</returns>
+        IEnumerator<SlotToken> IEnumerable<SlotToken>.GetEnumerator() => new SlotEnumerator(this.keys);
+
+        /// <summary>
+        /// Get a boxed enumerator. Avoid used this at all costs.
+        /// </summary>
+        /// <returns>Boxed enumerator</returns>
+        [ExcludeFromCodeCoverage] // Non-boxed version already covered
+        IEnumerator IEnumerable.GetEnumerator() => new SlotEnumerator(this.keys);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ref int GetKeyRef(SlotToken slot, int[] keys)
@@ -250,7 +340,7 @@ namespace Lecs.Memory
 
             this.capacity = capacity;
             this.capacityMinusOne = capacity - 1;
-            this.maxCount = GetMaxCount(capacity, maxLoadFactor);
+            this.maxCount = GetMaxCount(this.capacity, this.maxLoadFactor);
             this.count = 0;
 
             // Initialize the keys, set 0 through capacity to 'FreeKey' and then add 7 more keys and
@@ -283,10 +373,5 @@ namespace Lecs.Memory
             index = HashHelpers.ModuloPowerOfTwoMinusOne(index + 1, this.capacityMinusOne);
             return slot;
         }
-
-        IEnumerator<SlotToken> IEnumerable<SlotToken>.GetEnumerator() => new SlotEnumerator(this.keys);
-
-        [ExcludeFromCodeCoverage] // Non-boxed version already covered
-        IEnumerator IEnumerable.GetEnumerator() => new SlotEnumerator(this.keys);
     }
 }

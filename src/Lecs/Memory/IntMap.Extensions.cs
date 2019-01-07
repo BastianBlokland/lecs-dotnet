@@ -6,6 +6,9 @@ using System.Diagnostics;
 
 namespace Lecs.Memory
 {
+    /// <summary>
+    /// Non-generic helpers for the <See cRef="IntMap{T}"/>
+    /// </summary>
     public static partial class IntMap
     {
         /// <summary>
@@ -57,14 +60,14 @@ namespace Lecs.Memory
         /// <summary>
         /// Convenience extension for retrieving a value for given key.
         /// </summary>
+        /// <remarks>
+        /// Its perfectly legal to use this syntax to change the value
+        /// </remarks>
         /// <exception cref="KeyNotFoundException">Thrown when there is no value for given key</exception>
         /// <param name="map">Map to get a value from</param>
         /// <param name="key">Key to get a value from</param>
         /// <typeparam name="T">Type of the data</typeparam>
-        /// <returns>
-        /// Reference to the value in the map
-        /// NOTE: Its perfectly legal to use this syntax to change the value
-        /// </returns>
+        /// <returns> Reference to the value in the map </returns>
         public static ref T GetValue<T>(this IntMap<T> map, int key)
         {
             if (!map.Find(key, out SlotToken slot))

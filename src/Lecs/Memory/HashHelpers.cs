@@ -50,8 +50,10 @@ namespace Lecs.Memory
 
         /// <summary>
         /// Get the next power-of-two for given number.
-        /// NOTE: Number does not need to be a power-of-two itself
         /// </summary>
+        /// <remarks>
+        /// Number does not need to be a power-of-two itself
+        /// </remarks>
         /// <param name="num">Number to get the next power-of-two for</param>
         /// <returns>Next power-of-two</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,6 +87,7 @@ namespace Lecs.Memory
                 num |= num >> 16;
                 num++;
             }
+
             return num;
         }
 
@@ -133,6 +136,7 @@ namespace Lecs.Memory
                 value = -value;
                 Debug.Assert(value >= 0, "Negative value was not positive after negating");
             }
+
             return value;
         }
     }
