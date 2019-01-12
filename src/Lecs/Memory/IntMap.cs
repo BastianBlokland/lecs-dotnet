@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics.X86;
 
 using static Lecs.Memory.IntMap;
 
@@ -21,15 +20,15 @@ namespace Lecs.Memory
         per generic type */
 
         internal const int FreeKey = -1;
-        internal const int UnavailableKey = -2;
+        internal const int EndKey = -2;
     }
 
     /// <summary>
     /// Associative array that uses a integer as a key. Designed for fast quering and enumerating.
     /// Main usage is that you acquire a <See cRef="SlotToken"/> by either enumerating the slots,
-    /// finding a slot for a key or setting a item, with that token you can then get or set the value.
+    /// or finding a slot, with that token you can then get or set the value.
     ///
-    /// Implemented as a open-indexing hashmap with linear probing and simd instructions for finding keys.
+    /// Implemented as a open-indexing hashmap with linear probing for finding keys.
     /// </summary>
     /// <remarks>
     /// This map is designed more for speed then for safety, for example usage of <See cRef="SlotToken"/>
@@ -45,7 +44,7 @@ namespace Lecs.Memory
         private readonly bool isManaged;
         private readonly float maxLoadFactor;
 
-        private int[] keys; // Allocated 7 elements bigger for safe 256 bit jumps without range checking
+        private int[] keys; // Allocated 1 element bigger so we don't need range checks
         private T[] values;
         private int capacity; // Only power-of-two for fast modulo
         private int capacityMinusOne;
@@ -91,61 +90,91 @@ namespace Lecs.Memory
         public int Count => this.count;
 
         /// <summary>
-        /// Set a value for a key.
+        /// Find the slot where the given key is in the map.
         /// </summary>
-        /// <param name="key">Key to set the value for</param>
-        public T this[int key]
+        /// <param name="key">Key to look for</param>
+        /// <param name="slot">Slot where the given key is found</param>
+        /// <returns>'True' is the key was found, otherwise 'False' </returns>
+        public bool Find(int key, out SlotToken slot)
         {
-            get => this.GetValue(key);
-            set => this.Set(key, in value);
+            /* We use linear probing for searching so we get an initial slot from hashing the key
+            and then keeping advancing one-by-one until we find our key or we find a empty slot.
+            The first empty slot is returned so we can use this slot for insertions. */
+
+            slot = this.GetDesiredSlot(key);
+
+            // Create a int 'view' over the token because its easier to deal with.
+            ref int index = ref AsInt(ref slot);
+
+            while (true)
+            {
+                ref int element = ref this.keys[index];
+                if (element == key)
+                    return true;
+
+                switch (element)
+                {
+                    case FreeKey:
+                        return false;
+
+                    case EndKey:
+                        index = 0;
+                        break;
+
+                    default:
+                        index++;
+                        break;
+                }
+            }
         }
 
         /// <summary>
-        /// Set a value for a key.
+        /// Find a key in the map, if it does not exist then add it.
         /// </summary>
-        /// <param name="key">Key to set the value for</param>
-        /// <param name="value">Value to set</param>
-        /// <returns>Returns the slot where this value was set into</returns>
-        public SlotToken Set(int key, in T value)
+        /// <param name="key">Key to find</param>
+        /// <returns>Returns the slot where this key is in the map</returns>
+        public SlotToken FindOrAdd(int key)
         {
-            // Find a slot for this item
-            bool exists = this.Find(key, out SlotToken slot);
-            if (exists)
-            {
-                // If it already exists in the map we can just update it
-                GetValueRef(slot, this.values) = value;
-            }
-            else
-            {
-                Debug.Assert(GetKeyRef(slot, this.keys) == FreeKey, "Slot to insert to has to be empty");
-                Debug.Assert(Array.IndexOf(this.keys, key) == -1, "Incorrectly determined that key did not exist yet");
+            // If item already exists then return that slot
+            if (this.Find(key, out SlotToken slot))
+                return slot;
 
-                // Set the key and value to this free slot
-                GetKeyRef(slot, this.keys) = key;
-                GetValueRef(slot, this.values) = value;
+            Debug.Assert(this.keys[AsInt(ref slot)] == FreeKey, "Slot to insert to has to be empty");
+            Debug.Assert(Array.IndexOf(this.keys, key) == -1, "Incorrectly determined that key did not exist yet");
 
-                // Increment the count and grow the map if it now contains too many elements
-                this.count++;
-                if (this.count > this.maxCount)
+            // Set the key and value to this free slot
+            this.keys[AsInt(ref slot)] = key;
+
+            // Increment the count and grow the map if it now contains too many elements
+            this.count++;
+            if (this.count > this.maxCount)
+            {
+                var oldKeys = this.keys;
+                var oldValues = this.values;
+
+                // Grow the map
+                this.Initialize(capacity: HashHelpers.NextPowerOfTwo(this.capacity));
+
+                // Re-insert the old keys and values
+                var enumerator = new SlotEnumerator(oldKeys);
+                while (enumerator.MoveNext())
                 {
-                    var oldKeys = this.keys;
-                    var oldValues = this.values;
+                    var oldSlot = enumerator.Current;
+                    var newSlot = this.FindOrAdd(key: oldKeys[AsInt(ref oldSlot)]);
 
-                    // Grow the map
-                    this.Initialize(capacity: HashHelpers.NextPowerOfTwo(this.capacity));
+                    Debug.Assert(
+                        this.keys[AsInt(ref newSlot)] == oldKeys[AsInt(ref oldSlot)],
+                        "New slot does not contain the same key as the old slot");
 
-                    // Re-insert the old keys and values
-                    var enumerator = new SlotEnumerator(oldKeys);
-                    while (enumerator.MoveNext())
-                    {
-                        var oldSlot = enumerator.Current;
-                        this.Set(
-                            key: GetKeyRef(oldSlot, oldKeys),
-                            value: in GetValueRef(oldSlot, oldValues));
-                    }
+                    // Update our slot to return to the new slot it got
+                    if (oldKeys[AsInt(ref oldSlot)] == key)
+                        slot = newSlot;
+
+                    this.values[AsInt(ref newSlot)] = oldValues[AsInt(ref oldSlot)];
                 }
             }
 
+            Debug.Assert(this.keys[AsInt(ref slot)] == key, "Key does not exist at result slot");
             return slot;
         }
 
@@ -159,8 +188,8 @@ namespace Lecs.Memory
             possible, we do this by shiting them if a better slot opened up for them. */
 
             // Check if the slot not already free, this is to protect 'count' going too low on misuse.
-            if (GetKeyRef(slot, this.keys) == FreeKey)
-                throw new ArgumentException("Provided slot does not contain a value");
+            if (this.keys[AsInt(ref slot)] == FreeKey)
+                throw new ArgumentException("Provided slot is already empty");
 
             // Decrement count of items in map
             this.count--;
@@ -171,9 +200,10 @@ namespace Lecs.Memory
             SlotToken nextSlot = this.GetNextSlot(curSlot);
             while (true)
             {
-                ref int nextKey = ref GetKeyRef(nextSlot, this.keys);
+                ref int nextKey = ref this.keys[AsInt(ref nextSlot)];
 
-                Debug.Assert(nextKey != GetKeyRef(slot, this.keys), "Key lives in the map twice");
+                Debug.Assert(nextKey != EndKey, "Loop went out of bounds");
+                Debug.Assert(nextKey != this.keys[AsInt(ref slot)], "Key lives in the map twice");
 
                 // If its the end of a chain then we are done shifting
                 if (nextKey == FreeKey)
@@ -182,11 +212,7 @@ namespace Lecs.Memory
                 // If this is a better slot for the next key then shift it over
                 if (IsBetterSlot(nextKey, currentSlot: nextSlot, potentialSlot: curSlot))
                 {
-                    // Shift this slot over
-                    GetKeyRef(curSlot, this.keys) = GetKeyRef(nextSlot, this.keys);
-                    GetValueRef(curSlot, this.values) = GetValueRef(nextSlot, this.values);
-
-                    // Mark the now empty slot as our 'current'
+                    Copy(copyFrom: ref nextSlot, copyTo: ref curSlot);
                     curSlot = nextSlot;
                 }
 
@@ -196,17 +222,31 @@ namespace Lecs.Memory
             }
 
             // Mark the last slot in the chain as now being free
-            Debug.Assert(GetKeyRef(curSlot, this.keys) != FreeKey, "Slot was already free");
-            GetKeyRef(curSlot, this.keys) = FreeKey;
+            SetFree(ref curSlot);
 
-            // If 'T' is a managed type we need to clear it so the garbage-collector can clean it up.
-            if (this.isManaged)
-                GetValueRef(curSlot, this.values) = default(T);
+            void Copy(ref SlotToken copyFrom, ref SlotToken copyTo)
+            {
+                ref int fromIndex = ref AsInt(ref copyFrom);
+                ref int toIndex = ref AsInt(ref copyTo);
+                this.keys[toIndex] = this.keys[fromIndex];
+                this.values[toIndex] = this.values[fromIndex];
+            }
+
+            void SetFree(ref SlotToken slotToFree)
+            {
+                ref int index = ref AsInt(ref slotToFree);
+                Debug.Assert(this.keys[index] != FreeKey, "Slot was already free");
+                this.keys[index] = FreeKey;
+
+                // If 'T' is a managed type we need to clear it so the garbage-collector can clean it up.
+                if (this.isManaged)
+                    this.values[index] = default(T);
+            }
 
             bool IsBetterSlot(int key, SlotToken currentSlot, SlotToken potentialSlot)
             {
-                ref int currentIndex = ref Unsafe.As<SlotToken, int>(ref currentSlot);
-                ref int potentialIndex = ref Unsafe.As<SlotToken, int>(ref potentialSlot);
+                ref int currentIndex = ref AsInt(ref currentSlot);
+                ref int potentialIndex = ref AsInt(ref potentialSlot);
 
                 /*
                 D = Desired, C = Current
@@ -217,7 +257,7 @@ namespace Lecs.Memory
                 */
 
                 SlotToken desiredSlot = this.GetDesiredSlot(key);
-                ref int desiredIndex = ref Unsafe.As<SlotToken, int>(ref desiredSlot);
+                ref int desiredIndex = ref AsInt(ref desiredSlot);
                 if (potentialIndex == desiredIndex)
                     return true;
 
@@ -243,45 +283,21 @@ namespace Lecs.Memory
         }
 
         /// <summary>
-        /// Find the slot where the given key is in the map.
-        /// </summary>
-        /// <param name="key">Key to look for</param>
-        /// <param name="slot">Slot where the given key is found</param>
-        /// <returns>'True' is the key was found, otherwise 'False' </returns>
-        public bool Find(int key, out SlotToken slot)
-        {
-            /* We use linear probing for searching so we get an initial slot from hashing the key
-            and then keeping advancing one-by-one until we find our key or we find a empty slot.
-            The first empty slot is returned so we can use this slot for insertions. */
-
-            if (Avx2.IsSupported)
-                return this.FindAvx2(key, out slot);
-            else
-                throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Get the key for the given slot.
         /// </summary>
         /// <param name="slot">Slot to get the key for</param>
         /// <returns>Key</returns>
-        public int GetKey(SlotToken slot) =>
-            /* NOTE: We CANNOT hand out a ref to the key as we need to be in tight control of the
-            sequence of keys */
-            GetKeyRef(slot, this.keys);
+        public int GetKey(SlotToken slot) => this.keys[AsInt(ref slot)];
 
         /// <summary>
-        /// Get the value for the given slot.
+        /// Get a reference to the the value for the given slot.
         /// </summary>
         /// <remarks>
         /// Returned as a ref so it can also be used to change the value.
         /// </remarks>
         /// <param name="slot">Slot to get the value for</param>
         /// <returns>Ref to the value</returns>
-        public ref T GetValue(SlotToken slot) =>
-            /* NOTE: Its mostly safe to hand out a ref to the value as its okay the caller to change
-            this without us knowing. The only exception to this is when we resize the map. */
-            ref GetValueRef(slot, this.values);
+        public ref T GetValueRef(SlotToken slot) => ref this.values[AsInt(ref slot)];
 
         /// <summary>
         /// Get a enumerator for enumerating all used slots.
@@ -301,34 +317,6 @@ namespace Lecs.Memory
         /// <returns>Boxed enumerator</returns>
         [ExcludeFromCodeCoverage] // Non-boxed version already covered
         IEnumerator IEnumerable.GetEnumerator() => new SlotEnumerator(this.keys);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static ref int GetKeyRef(SlotToken slot, int[] keys)
-        {
-            ref int index = ref Unsafe.As<SlotToken, int>(ref slot);
-
-            // Assert that we are not indexing out of bounds
-            Debug.Assert(index >= 0 && index < keys.Length, "'SlotToken' out of bounds");
-
-            // Using explicit memory offsets to avoid the range checks that the array indexer does
-            // normally. As long as we never shrink the arrays this should be safe because users cannot
-            // create a 'SlotToken' themselves (without using reflection or Unsafe api's).
-            return ref Unsafe.Add(ref keys[0], index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static ref T GetValueRef(SlotToken slot, T[] values)
-        {
-            ref int index = ref Unsafe.As<SlotToken, int>(ref slot);
-
-            // Assert that we are not indexing out of bounds
-            Debug.Assert(index >= 0 && index < values.Length, "'SlotToken' out of bounds");
-
-            // Using explicit memory offsets to avoid the range checks that the array indexer does
-            // normally. As long as we never shrink the arrays this should be safe because users cannot
-            // create a 'SlotToken' themselves (without using reflection or Unsafe api's).
-            return ref Unsafe.Add(ref values[0], index);
-        }
 
         private static int GetMaxCount(int capacity, float maxLoadFactor)
         {
@@ -350,12 +338,11 @@ namespace Lecs.Memory
             this.maxCount = GetMaxCount(this.capacity, this.maxLoadFactor);
             this.count = 0;
 
-            // Initialize the keys, set 0 through capacity to 'FreeKey' and then add 7 more keys and
-            // set them to 'UnavailableKey', this allows us to always load 8 keys at the time without
-            // having to do range checks
-            this.keys = new int[capacity + 7];
+            // Initialize the keys, add a 'EndKey' at the end so we can avoid range checks in a few
+            // loops
+            this.keys = new int[capacity + 1];
             Array.Fill(this.keys, value: FreeKey, startIndex: 0, count: capacity);
-            Array.Fill(this.keys, value: UnavailableKey, startIndex: capacity, count: 7);
+            this.keys[capacity] = EndKey;
 
             // Initialize the value, leave them at default
             this.values = new T[capacity];
@@ -366,14 +353,13 @@ namespace Lecs.Memory
         {
             int hash = HashHelpers.Mix(key); // Mix the key to avoid sequential input causing many collisions
             int index = HashHelpers.ModuloPowerOfTwoMinusOne(hash, this.capacityMinusOne);
-            return Unsafe.As<int, SlotToken>(ref index);
+            return AsSlotToken(ref index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private SlotToken GetNextSlot(SlotToken slot)
         {
-            // Its safe to interpret 'SlotToken' as an integer because they have the same layout
-            ref int index = ref Unsafe.As<SlotToken, int>(ref slot);
+            ref int index = ref AsInt(ref slot);
 
             // NOTE: We actually change the 'slot' parameter here because the 'index' is a int
             // reference over that variable, its safe because 'slot' parameter is passed as a copy

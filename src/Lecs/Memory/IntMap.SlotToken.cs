@@ -2,6 +2,7 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Lecs.Memory
@@ -13,6 +14,16 @@ namespace Lecs.Memory
     {
         /* Use this non-generic class for putting static data that does not need to be 'instantiated'
         per generic type */
+
+        // Utility for interpreting a 'SlotToken' as int (safe because they have the same layout)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ref int AsInt(ref SlotToken token) =>
+            ref Unsafe.As<SlotToken, int>(ref token);
+
+        // Utility for interpreting a int as a 'SlotToken' (safe because they have the same layout)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ref SlotToken AsSlotToken(ref int token) =>
+            ref Unsafe.As<int, SlotToken>(ref token);
 
         /// <summary>
         /// Token used to identify a slot in the map

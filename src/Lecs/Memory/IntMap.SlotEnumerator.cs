@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Lecs.Memory
 {
@@ -23,8 +22,7 @@ namespace Lecs.Memory
         ///
         /// - <See cRef="Current"/> only returns a valid token after a call to <See cRef="MoveNext()"/>
         /// returned true, trying to use a token that was acquired in other cases leads to undefined
-        /// behaviour and will probably crash. This is because for performance reasons there are very
-        /// little checks on the usage of <See cRef="SlotToken"/>.
+        /// behaviour.
         ///
         /// - Tokens returned from <See cRef="Current"/> should not be cached because the map might be
         /// reordered when adding / removing items.
@@ -49,7 +47,7 @@ namespace Lecs.Memory
             /// Few gotchas:
             /// - Only returns a valid <See cRef="SlotToken"/> when a call to  <See cRef="MoveNext()"/>
             /// returned true, trying to use a token that was acquired in other scenarios is considered
-            /// undefined behaviour and will probably crash.
+            /// undefined behaviour.
             ///
             /// - Tokens returned from this should NOT be cached because the map might be reordered
             /// when adding or removing items.
@@ -57,7 +55,7 @@ namespace Lecs.Memory
             /// <value>
             /// Token pointing to the current slot, this token can be used in:
             /// - <See cRef="IntMap{T}.GetKey(SlotToken slot)"/>
-            /// - <See cRef="IntMap{T}.GetValue(SlotToken slot)"/>
+            /// - <See cRef="IntMap{T}.GetValueRef(SlotToken slot)"/>
             /// </value>
             public SlotToken Current
             {
@@ -72,7 +70,7 @@ namespace Lecs.Memory
                     */
 
                     Debug.Assert(this.currentIndex >= 0, "'Current' called when index is invalid");
-                    return Unsafe.As<int, SlotToken>(ref this.currentIndex);
+                    return AsSlotToken(ref this.currentIndex);
                 }
             }
 
@@ -92,10 +90,6 @@ namespace Lecs.Memory
                 /*
                 Logic here is to skip a 'FreeKey' and to exit when we find a 'UnavailableKey' (those
                 are always at the end of the keys array).
-
-                I considered implementing this with simd instructions but will probably not be faster
-                as we try to have as little gaps in our arrays as possible so this should only loop
-                for a few spaces maximum.
                 */
 
                 while (true)
@@ -105,13 +99,12 @@ namespace Lecs.Memory
                     // Assert that we can never index out of bounds
                     Debug.Assert(this.currentIndex < this.keys.Length, "'currentIndex' is out of bounds");
 
-                    // 'Unsafe.Add' instead of array indexing because we do not need the bounds checking
-                    switch (Unsafe.Add(ref this.keys[0], this.currentIndex))
+                    switch (this.keys[this.currentIndex])
                     {
                         case FreeKey:
                             continue;
 
-                        case UnavailableKey:
+                        case EndKey:
                         {
                             this.currentIndex = -1;
                             return false;

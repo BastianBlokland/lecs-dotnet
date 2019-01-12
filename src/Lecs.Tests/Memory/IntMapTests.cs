@@ -6,7 +6,6 @@ using System.Linq;
 using Xunit;
 
 using Lecs.Memory;
-using Lecs.Tests.Attributes;
 
 namespace Lecs.Tests.Memory
 {
@@ -40,7 +39,7 @@ namespace Lecs.Tests.Memory
             for (int i = 0; i < AddCount; i++)
             {
                 Assert.Equal(i, map.Count);
-                map.Set(key: i, value: 1f);
+                map.Add(key: i, value: 1f);
             }
 
             Assert.Equal(AddCount, map.Count);
@@ -52,10 +51,10 @@ namespace Lecs.Tests.Memory
             const int TestKey = -234928;
 
             var map = new IntMap<float>(initialCapacity: 2);
-            map[TestKey] = 23423;
-            map[TestKey] = 836;
-            map[TestKey] = 93836;
-            map[TestKey] = 283467;
+            map.Add(TestKey, 23423);
+            map.Add(TestKey, 836);
+            map.Add(TestKey, 93836);
+            map.Add(TestKey, 283467);
 
             Assert.Equal(1, map.Count);
         }
@@ -72,7 +71,7 @@ namespace Lecs.Tests.Memory
             {
                 int key = rand.Next(maxValue: 1000);
                 double value = rand.NextDouble();
-                map[key] = value;
+                map.Add(key, in value);
             }
 
             // Take note of all keys above 500
@@ -115,7 +114,7 @@ namespace Lecs.Tests.Memory
                     int key = rand.Next(maxValue: 10_000);
                     string value = rand.NextDouble().ToString(CultureInfo.InvariantCulture);
 
-                    map[key] = value;
+                    map.Add(key, in value);
                     referenceDict[key] = value;
                 }
 
@@ -135,7 +134,7 @@ namespace Lecs.Tests.Memory
                 IntMap.SlotToken slot;
                 Assert.True(map.Find(kvp.Key, out slot));
                 Assert.Equal(kvp.Key, map.GetKey(slot));
-                Assert.Equal(kvp.Value, map.GetValue(slot));
+                Assert.Equal(kvp.Value, map.GetValueRef(slot));
             }
         }
 
@@ -161,7 +160,7 @@ namespace Lecs.Tests.Memory
                 int key = rand.Next();
                 double value = rand.NextDouble();
 
-                map[key] = value;
+                map.Add(key, in value);
                 referenceDict[key] = value;
             }
 
@@ -170,7 +169,7 @@ namespace Lecs.Tests.Memory
 
             // Assert that all keys from the reference dict can be found in our map
             foreach (var kvp in referenceDict)
-                Assert.Equal(kvp.Value, map.GetValue(kvp.Key));
+                Assert.Equal(kvp.Value, map.GetValueRef(kvp.Key));
 
             // Get all the keys that are returned from the map enumerator
             var keys = map.Select(slot => map.GetKey(slot)).ToArray();
@@ -188,21 +187,21 @@ namespace Lecs.Tests.Memory
 
             var map = new IntMap<int>(initialCapacity: 2);
 
-            var slot = map.Set(TestKey, value: 10);
-            ref var valRef = ref map.GetValue(slot);
+            var slot = map.Add(TestKey, value: 10);
+            ref var valRef = ref map.GetValueRef(slot);
 
             Assert.Equal(10, valRef);
 
             valRef = 20;
 
-            Assert.Equal(20, map.GetValue(TestKey));
+            Assert.Equal(20, map.GetValueRef(TestKey));
         }
 
         [Fact]
         public static void Get_OnItemThatDoesNotExistsThrows()
         {
             var map = new IntMap<double>();
-            Assert.Throws<KeyNotFoundException>(() => map.GetValue(0));
+            Assert.Throws<KeyNotFoundException>(() => map.GetValueRef(0));
         }
 
         [Fact]
