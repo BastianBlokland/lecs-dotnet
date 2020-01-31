@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Lecs.Memory
 {
@@ -35,7 +36,7 @@ namespace Lecs.Memory
         public static void Remove<T>(this IntMap<T> map, int key)
         {
             // Find the slot for this item
-            if (!map.Find(key, out SlotToken slot)) // If not found: No need to remove it
+            if (!map.GetSlot(key, out SlotToken slot)) // If not found: No need to remove it
                 return;
             map.Remove(slot);
         }
@@ -51,7 +52,8 @@ namespace Lecs.Memory
         /// <returns>Slot that the item was inserted at</returns>
         public static SlotToken Add<T>(this IntMap<T> map, int key, in T value)
         {
-            var slot = map.FindOrAdd(key);
+            bool inMap = map.GetSlot(key, out var slot, addIfMissing: true);
+            Debug.Assert(inMap, "Failed to insert");
             map.GetValueRef(slot) = value;
             return slot;
         }
@@ -66,7 +68,7 @@ namespace Lecs.Memory
         /// <returns> Reference to the value in the map </returns>
         public static ref T GetValueRef<T>(this IntMap<T> map, int key)
         {
-            if (!map.Find(key, out SlotToken slot))
+            if (!map.GetSlot(key, out SlotToken slot))
                 throw new KeyNotFoundException($"Key: '{key}' is not found in this map");
             return ref map.GetValueRef(slot);
         }

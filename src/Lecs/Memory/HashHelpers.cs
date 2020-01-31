@@ -17,21 +17,25 @@ namespace Lecs.Memory
         /// <param name="num">Number to mix</param>
         /// <returns>Mixed version of <paramref name="num"/></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int Mix(int num)
+        internal static unsafe int Mix(int num)
         {
             /*
             Implementation of a fnv hash: https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
             More info: http://isthe.com/chongo/tech/comp/fnv/
             */
 
-            unchecked
-            {
-                // Constants used from the 32 bit table of the fnv wiki.
-                const int FnvPrime = 16777619;
-                const int FnvOffsetBasis = (int)0x811c9dc5;
+            // Constants used from the 32 bit table of the fnv wiki.
+            const uint FnvPrime = 0x01000193; // 16777619
+            const uint FnvOffsetBasis = 0x811C9DC5; // 2166136261
 
-                return (FnvOffsetBasis ^ num) * FnvPrime;
-            }
+            uint result = FnvOffsetBasis;
+
+            byte* asByte = (byte*)&num;
+            result = (*asByte++ ^ result) * FnvPrime;
+            result = (*asByte++ ^ result) * FnvPrime;
+            result = (*asByte++ ^ result) * FnvPrime;
+            result = (*asByte ^ result) * FnvPrime;
+            return Unsafe.As<uint, int>(ref result);
         }
 
         /// <summary>

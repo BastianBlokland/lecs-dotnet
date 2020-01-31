@@ -31,12 +31,12 @@ namespace Lecs.Memory
         /// </remarks>
         public struct SlotEnumerator : IEnumerator<IntMap.SlotToken>, IEnumerator
         {
-            private readonly int[] keys;
+            private readonly long[] keyData;
             private int currentIndex;
 
-            internal SlotEnumerator(int[] keys)
+            internal SlotEnumerator(long[] keyData)
             {
-                this.keys = keys;
+                this.keyData = keyData;
                 this.currentIndex = -1;
             }
 
@@ -97,14 +97,15 @@ namespace Lecs.Memory
                     this.currentIndex++;
 
                     // Assert that we can never index out of bounds
-                    Debug.Assert(this.currentIndex < this.keys.Length, "'currentIndex' is out of bounds");
+                    Debug.Assert(this.currentIndex < this.keyData.Length, "'currentIndex' is out of bounds");
 
-                    switch (this.keys[this.currentIndex])
+                    // Mask of the lower 32 bit to get to our control data
+                    switch (this.keyData[this.currentIndex] & ControlMask)
                     {
-                        case FreeKey:
+                        case FreeControl:
                             continue;
 
-                        case EndKey:
+                        case EndControl:
                         {
                             this.currentIndex = -1;
                             return false;

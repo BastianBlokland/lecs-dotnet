@@ -1,6 +1,7 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -14,6 +15,14 @@ namespace Lecs.Memory
     {
         /* Use this non-generic class for putting static data that does not need to be 'instantiated'
         per generic type */
+
+        // Utility for retrieving a item from an array by using a slot token.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ref T GetRef<T>(this T[] array, SlotToken token)
+        {
+            ref int index = ref Unsafe.As<SlotToken, int>(ref token);
+            return ref array[index];
+        }
 
         // Utility for interpreting a 'SlotToken' as int (safe because they have the same layout)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

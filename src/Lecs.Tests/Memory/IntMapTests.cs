@@ -111,7 +111,7 @@ namespace Lecs.Tests.Memory
                 // Insert x items
                 for (int j = 0; j < rand.Next(maxValue: 1000); j++)
                 {
-                    int key = rand.Next(maxValue: 10_000);
+                    int key = GetRandomKey(rand);
                     string value = rand.NextDouble().ToString(CultureInfo.InvariantCulture);
 
                     map.Add(key, in value);
@@ -121,7 +121,7 @@ namespace Lecs.Tests.Memory
                 // Remove x items
                 for (int j = 0; j < rand.Next(maxValue: 1000); j++)
                 {
-                    int key = rand.Next(maxValue: 10_000);
+                    int key = GetRandomKey(rand);
                     map.Remove(key);
                     referenceDict.Remove(key);
                 }
@@ -132,7 +132,7 @@ namespace Lecs.Tests.Memory
             foreach (var kvp in referenceDict)
             {
                 IntMap.SlotToken slot;
-                Assert.True(map.Find(kvp.Key, out slot));
+                Assert.True(map.GetSlot(kvp.Key, out slot));
                 Assert.Equal(kvp.Key, map.GetKey(slot));
                 Assert.Equal(kvp.Value, map.GetValueRef(slot));
             }
@@ -154,14 +154,12 @@ namespace Lecs.Tests.Memory
 
             // Insert test data in both maps
             var rand = new Random(Seed: 1);
-            for (int i = 0; i < 10_000; i++)
+            for (int i = -5_000; i < 5_000; i++)
             {
-                // Note: Might be duplicate keys but thats fine
-                int key = rand.Next();
                 double value = rand.NextDouble();
 
-                map.Add(key, in value);
-                referenceDict[key] = value;
+                map.Add(i, in value);
+                referenceDict[i] = value;
             }
 
             // Assert that both maps contain the same amount of entries
@@ -251,6 +249,13 @@ namespace Lecs.Tests.Memory
         {
             Assert.Equal("0", default(IntMap.SlotToken).ToString());
             Assert.Equal("123", new IntMap.SlotToken(123).ToString());
+        }
+
+        private static int GetRandomKey(Random rand)
+        {
+            var min = (long)int.MinValue;
+            var max = (long)int.MaxValue;
+            return (int)(min + (max * 2 * rand.NextDouble()));
         }
     }
 }
